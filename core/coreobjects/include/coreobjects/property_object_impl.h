@@ -1806,7 +1806,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::Deserialize(
     ErrCode errCode = serialized->readString("className"_daq, &className);
     if (OPENDAQ_FAILED(errCode))
     {
-        return errCode;
+        className.release();
     }
 
     Bool isFrozen{};
