@@ -35,7 +35,6 @@ inline IoFolderConfigPtr IoFolder(const ContextPtr& context,
                                   const ComponentStandardProps propertyMode = ComponentStandardProps::Add)
 {
     FolderConfigPtr obj(IoFolderWithDefaultPropertyMode_Create(context, parent, localId, static_cast<Int>(propertyMode)));
-    // FolderConfigPtr obj(IoFolder_Create(context, parent, localId));
     return obj;
 }
 

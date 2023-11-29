@@ -34,6 +34,7 @@ rtgen(SRC_RulePrivate rule_private.h)
 rtgen(SRC_InputPortNotifications input_port_notifications.h)
 rtgen(SRC_Deleter deleter.h)
 rtgen(SRC_Allocator allocator.h)
+rtgen(SRC_SignalBuilder signal_builder.h)
 
 source_group("signal" FILES ${SDK_HEADERS_DIR}/signal.h
                             ${SDK_HEADERS_DIR}/signal_impl.h
@@ -42,7 +43,10 @@ source_group("signal" FILES ${SDK_HEADERS_DIR}/signal.h
                             ${SDK_HEADERS_DIR}/signal_events.h
                             ${SDK_HEADERS_DIR}/signal_private.h
                             ${SDK_HEADERS_DIR}/signal_config.h
+                            ${SDK_HEADERS_DIR}/signal_builder.h
+                            ${SDK_HEADERS_DIR}/signal_builder_impl.h
                             signal_impl.cpp
+                            signal_builder_impl.cpp
 )
 
 source_group("data_descriptor" FILES ${SDK_HEADERS_DIR}/data_descriptor.h
@@ -172,6 +176,7 @@ set(SRC_Cpp connection_impl.cpp
             data_descriptor_builder_impl.cpp
             malloc_allocator_impl.cpp
             external_allocator_impl.cpp
+            signal_builder_impl.cpp
 )
 
 set(SRC_PublicHeaders
@@ -207,6 +212,7 @@ set(SRC_PublicHeaders
     packet_destruct_callback_impl.h
     packet_destruct_callback_factory.h
     signal_impl.h
+    signal_builder_impl.h
 )
 
 set(SRC_PrivateHeaders connection_impl.h
@@ -277,6 +283,7 @@ list(APPEND SRC_Cpp ${SRC_Connection_Cpp}
                     ${SRC_ScalingBuilder_Cpp}
                     ${SRC_InputPortNotifications_Cpp}
                     ${SRC_Allocator_Cpp}
+                    ${SRC_SignalBuilder_Cpp}
 )
 
 list(APPEND SRC_PublicHeaders ${SRC_Connection_PublicHeaders}
@@ -305,6 +312,7 @@ list(APPEND SRC_PublicHeaders ${SRC_Connection_PublicHeaders}
                               ${SRC_Allocator_PublicHeaders}
                               ${SRC_InputPortPrivate_PublicHeaders}
                               ${SRC_SignalPrivate_PublicHeaders}
+                              ${SRC_SignalBuilder_PublicHeaders}
 )
 
 list(APPEND SRC_PrivateHeaders ${SRC_Connection_PrivateHeaders}
@@ -335,6 +343,7 @@ list(APPEND SRC_PrivateHeaders ${SRC_Connection_PrivateHeaders}
                                ${SRC_InputPortNotifications_PrivateHeaders}
                                ${SRC_Deleter_PrivateHeaders}
                                ${SRC_Allocator_PrivateHeaders}
+                               ${SRC_SignalBuilder_PrivateHeaders}
 )
 
 if (WIN32)

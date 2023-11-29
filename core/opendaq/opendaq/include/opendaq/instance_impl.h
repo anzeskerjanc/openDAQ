@@ -53,22 +53,21 @@ public:
 
     ErrCode INTERFACE_FUNC getCustomComponents(IList** customComponents) override;
 
-    ErrCode INTERFACE_FUNC getSignals(IList** signals) override;
+    ErrCode INTERFACE_FUNC getSignals(IList** signals, ISearchParams* searchParams = nullptr) override;
     ErrCode INTERFACE_FUNC getSignalsRecursive(IList** signals) override;
-
 
     ErrCode INTERFACE_FUNC getAvailableDevices(IList** availableDevices) override;
     ErrCode INTERFACE_FUNC getAvailableDeviceTypes(IDict** deviceTypes) override;
     ErrCode INTERFACE_FUNC addDevice(IDevice** device, IString* connectionString, IPropertyObject* config) override;
     ErrCode INTERFACE_FUNC removeDevice(IDevice* device) override;
-    ErrCode INTERFACE_FUNC getDevices(IList** devices) override;
+    ErrCode INTERFACE_FUNC getDevices(IList** devices, ISearchParams* searchParams = nullptr) override;
 
     ErrCode INTERFACE_FUNC getAvailableFunctionBlockTypes(IDict** functionBlockTypes) override;
     ErrCode INTERFACE_FUNC addFunctionBlock(IFunctionBlock** functionBlock, IString* typeId, IPropertyObject* config) override;
     ErrCode INTERFACE_FUNC removeFunctionBlock(IFunctionBlock* functionBlock) override;
-    ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks) override;
+    ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks, ISearchParams* searchParams = nullptr) override;
 
-    ErrCode INTERFACE_FUNC getChannels(IList** channels) override;
+    ErrCode INTERFACE_FUNC getChannels(IList** channels, ISearchParams* searchParams = nullptr) override;
     ErrCode INTERFACE_FUNC getChannelsRecursive(IList** channels) override;
 
     ErrCode INTERFACE_FUNC saveConfiguration(IString** configuration) override;
@@ -92,10 +91,11 @@ public:
     ErrCode INTERFACE_FUNC getDescription(IString** description) override;
     ErrCode INTERFACE_FUNC setDescription(IString* description) override;
     ErrCode INTERFACE_FUNC getTags(ITagsConfig** tags) override;
+    ErrCode INTERFACE_FUNC getVisible(Bool* visible) override;
 
     // IFolder
 
-    ErrCode INTERFACE_FUNC getItems(IList** items) override;
+    ErrCode INTERFACE_FUNC getItems(IList** items, ISearchParams* searchParams) override;
     ErrCode INTERFACE_FUNC getItem(IString* localId, IComponent** item) override;
     ErrCode INTERFACE_FUNC isEmpty(Bool* empty) override;
     ErrCode INTERFACE_FUNC hasItem(IString* localId, Bool* value) override;

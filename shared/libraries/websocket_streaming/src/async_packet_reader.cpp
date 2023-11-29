@@ -1,5 +1,6 @@
 #include "websocket_streaming/async_packet_reader.h"
 #include <opendaq/instance_factory.h>
+#include <opendaq/search_params_factory.h>
 
 BEGIN_NAMESPACE_OPENDAQ_WEBSOCKET_STREAMING
 
@@ -65,7 +66,7 @@ void AsyncPacketReader::startReadThread()
 void AsyncPacketReader::createReaders()
 {
     signalReaders.clear();
-    auto signals = device.getSignalsRecursive();
+    auto signals = device.getSignals(SearchParams(false, true));
 
     for (const auto& signal : signals)
     {

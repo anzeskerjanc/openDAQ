@@ -22,6 +22,16 @@
 
 BEGIN_NAMESPACE_OPENDAQ
 
+/*!
+ * @ingroup opendaq_components
+ * @addtogroup opendaq_component Component
+ * @{
+ */
+
+/*!
+ * @brief Component construction parameter that determines whether standard component properties
+ * such as "Name" and "Description" should be added, added as read-only, or skipped.
+ */
 enum class ComponentStandardProps
 {
     Add,
@@ -37,11 +47,6 @@ enum class ComponentStandardProps
  * [interfaceSmartPtr(IComponent, GenericComponentPtr)]
  */
 
-/*!
- * @ingroup opendaq_components
- * @addtogroup opendaq_component Component
- * @{
- */
 
 /*!
  * @brief Acts as a base interface for components, such as device, function block, channel and signal.
@@ -146,6 +151,14 @@ DECLARE_OPENDAQ_INTERFACE(IComponent, IPropertyObject)
      * Tags are user definable labels that can be attached to the component.
      */
     virtual ErrCode INTERFACE_FUNC getTags(ITagsConfig** tags) = 0;
+
+    /*!
+     * @brief Gets `visible` metadata state of the component
+     * @param[out] visible True if the component is visible; False otherwise.
+     *
+     * Visible determines whether search/getter methods return find the component by default.
+     */
+    virtual ErrCode INTERFACE_FUNC getVisible(Bool* visible) = 0;
 };
 /*!@}*/
 

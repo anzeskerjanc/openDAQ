@@ -285,9 +285,9 @@ ErrCode InstanceImpl::getCustomComponents(IList** customFolders)
     return rootDevice->getCustomComponents(customFolders);
 }
 
-ErrCode InstanceImpl::getSignals(IList** signals)
+ErrCode InstanceImpl::getSignals(IList** signals, ISearchParams* searchParams)
 {
-    return rootDevice->getSignals(signals);
+    return rootDevice->getSignals(signals, searchParams);
 }
 
 ErrCode InstanceImpl::getSignalsRecursive(IList** signals)
@@ -387,9 +387,14 @@ ErrCode InstanceImpl::getTags(ITagsConfig** tags)
     return rootDevice->getTags(tags);
 }
 
-ErrCode InstanceImpl::getItems(IList** items)
+ErrCode InstanceImpl::getVisible(Bool* visible)
 {
-    return rootDevice->getItems(items);
+    return rootDevice->getVisible(visible);
+}
+
+ErrCode InstanceImpl::getItems(IList** items, ISearchParams* searchParams)
+{
+    return rootDevice->getItems(items, searchParams);
 }
 
 ErrCode InstanceImpl::getItem(IString* localId, IComponent** item)
@@ -445,9 +450,9 @@ ErrCode InstanceImpl::removeDevice(IDevice* device)
     return rootDevice->removeDevice(device);
 }
 
-ErrCode InstanceImpl::getDevices(IList** devices)
+ErrCode InstanceImpl::getDevices(IList** devices, ISearchParams* searchParams)
 {
-    return rootDevice->getDevices(devices);
+    return rootDevice->getDevices(devices, searchParams);
 }
 
 ErrCode InstanceImpl::getAvailableFunctionBlockTypes(IDict** functionBlockTypes)
@@ -523,15 +528,15 @@ ErrCode InstanceImpl::removeFunctionBlock(IFunctionBlock* functionBlock)
     return defaultRootDevice->removeFunctionBlock(functionBlock);
 }
 
-ErrCode InstanceImpl::getFunctionBlocks(IList** functionBlocks)
+ErrCode InstanceImpl::getFunctionBlocks(IList** functionBlocks, ISearchParams* searchParams)
 {
     if (isDefaultRootDevice())
-        return rootDevice->getFunctionBlocks(functionBlocks);
+        return rootDevice->getFunctionBlocks(functionBlocks, searchParams);
 
     OPENDAQ_PARAM_NOT_NULL(functionBlocks);
 
     ListPtr<IFunctionBlock> rootDeviceFbs;
-    auto errCode = rootDevice->getFunctionBlocks(&rootDeviceFbs);
+    auto errCode = rootDevice->getFunctionBlocks(&rootDeviceFbs, searchParams);
     if (OPENDAQ_FAILED(errCode))
     {
         if (errCode == OPENDAQ_ERR_NOTIMPLEMENTED)
@@ -541,7 +546,7 @@ ErrCode InstanceImpl::getFunctionBlocks(IList** functionBlocks)
     }
 
     ListPtr<IFunctionBlock> daqClientFbs;
-    errCode = defaultRootDevice->getFunctionBlocks(&daqClientFbs);
+    errCode = defaultRootDevice->getFunctionBlocks(&daqClientFbs, searchParams);
     if (OPENDAQ_FAILED(errCode))
     {
         if (errCode == OPENDAQ_ERR_NOTIMPLEMENTED)
@@ -561,9 +566,9 @@ ErrCode InstanceImpl::getFunctionBlocks(IList** functionBlocks)
     return OPENDAQ_SUCCESS;
 }
 
-ErrCode InstanceImpl::getChannels(IList** channels)
+ErrCode InstanceImpl::getChannels(IList** channels, ISearchParams* searchParams)
 {
-    return rootDevice->getChannels(channels);
+    return rootDevice->getChannels(channels, searchParams);
 }
 
 ErrCode InstanceImpl::getChannelsRecursive(IList** channels)

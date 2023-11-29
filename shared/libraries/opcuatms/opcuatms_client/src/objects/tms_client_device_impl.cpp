@@ -395,7 +395,7 @@ void TmsClientDeviceImpl::onRemoveFunctionBlock(const FunctionBlockPtr& /*functi
 void TmsClientDeviceImpl::setUpStreamings()
 {
     auto self = this->borrowPtr<DevicePtr>();
-    const auto signals = self.getSignalsRecursive();
+    const auto signals = self.getSignals(SearchParams(false, true));
     LOG_I("Device \"{}\" has established {} streaming connections", globalId, streamings.size());
     for (const auto& streaming : streamings)
     {

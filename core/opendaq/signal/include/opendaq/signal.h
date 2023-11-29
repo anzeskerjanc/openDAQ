@@ -20,6 +20,8 @@
 
 BEGIN_NAMESPACE_OPENDAQ
 
+struct ISignalBuilder;
+
 /*#
  * [interfaceSmartPtr(IComponent, GenericComponentPtr, "<opendaq/component_ptr.h>")]
  * [interfaceSmartPtr(IConnection, ObjectPtr<IConnection>)]
@@ -130,5 +132,15 @@ DECLARE_OPENDAQ_INTERFACE(ISignal, IComponent)
     virtual ErrCode INTERFACE_FUNC setStreamed(Bool streamed) = 0;
 };
 /*!@}*/
+
+/*!
+ * @brief Creates a signal using the metadata configured within the Signal Builder
+ * @param signalBuilder The Signal Builder object that contains metadata for signal creation.
+ */
+OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
+    LIBRARY_FACTORY, SignalFromBuilder, ISignal,
+    ISignalBuilder*, signalBuilder
+)
+
 
 END_NAMESPACE_OPENDAQ

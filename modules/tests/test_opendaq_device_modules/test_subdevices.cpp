@@ -148,8 +148,8 @@ TEST_P(SubDevicesTest, RootStreamingActive)
     auto gateway = CreateGatewayInstance();
     auto client = CreateClientInstance(MIN_CONNECTIONS);
 
-    auto clientSignals = client.getSignalsRecursive();
-    auto gatewaySignals = gateway.getSignalsRecursive();
+    auto clientSignals = client.getSignals(SearchParams(true, true));
+    auto gatewaySignals = gateway.getSignals(SearchParams(true, true));
     ASSERT_EQ(clientSignals.getCount(), gatewaySignals.getCount());
 
     for (size_t index = 0; index < clientSignals.getCount(); ++index)
@@ -162,7 +162,7 @@ TEST_P(SubDevicesTest, RootStreamingActive)
     }
 
     using namespace std::chrono_literals;
-    StreamReaderPtr reader = daq::StreamReader<double, uint64_t>(client.getSignalsRecursive()[0]);
+    StreamReaderPtr reader = daq::StreamReader<double, uint64_t>(client.getSignals(SearchParams(true, true))[0]);
 
     std::this_thread::sleep_for(1000ms);
     double samples[100];
@@ -183,8 +183,8 @@ TEST_P(SubDevicesTest, LeafStreamingsActive)
     auto gateway = CreateGatewayInstance();
     auto client = CreateClientInstance(MIN_HOPS);
 
-    auto clientSignals = client.getSignalsRecursive();
-    auto gatewaySignals = gateway.getSignalsRecursive();
+    auto clientSignals = client.getSignals(SearchParams(true, true));
+    auto gatewaySignals = gateway.getSignals(SearchParams(true, true));
     ASSERT_EQ(clientSignals.getCount(), gatewaySignals.getCount());
 
     for (size_t index = 0; index < clientSignals.getCount(); ++index)
@@ -198,7 +198,7 @@ TEST_P(SubDevicesTest, LeafStreamingsActive)
     }
 
     using namespace std::chrono_literals;
-    StreamReaderPtr reader = daq::StreamReader<double, uint64_t>(client.getSignalsRecursive()[0]);
+    StreamReaderPtr reader = daq::StreamReader<double, uint64_t>(client.getSignals(SearchParams(true, true))[0]);
     
     std::this_thread::sleep_for(1000ms);
     double samples[100];

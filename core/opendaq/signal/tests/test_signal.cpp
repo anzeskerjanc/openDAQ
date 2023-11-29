@@ -8,6 +8,8 @@
 #include <coreobjects/property_object_class_factory.h>
 #include <gtest/gtest.h>
 
+#include "opendaq/tags_factory.h"
+
 using SignalTest = testing::Test;
 
 BEGIN_NAMESPACE_OPENDAQ
@@ -439,6 +441,36 @@ TEST_F(SignalTest, SerializeAndUpdate)
     const auto str2 = serializer2.getOutput();
 
     ASSERT_EQ(str1, str2);
+}
+
+TEST_F(SignalTest, SignalBuilder)
+{
+    const auto domainSignal = Signal(NullContext(), nullptr, "domain");
+    const auto tags = Tags();
+    tags.add("tag");
+    auto builder = SignalBuilder(NullContext(), nullptr, "sig");
+    const auto signal = builder.setActive(false)
+                               .setComponentStandardPropsMode(ComponentStandardProps::AddReadOnly)
+                               .setDescription("foo")
+                               .setDescriptor(DataDescriptorBuilder().build())
+                               .setDomainSignal(domainSignal).setPublic(false)
+                               .setRelatedSignals(List<ISignal>(domainSignal))
+                               .setName("custom_name")
+                               .setTags(tags)
+                               .setVisible(false)
+                               .build();
+
+    ASSERT_EQ(signal.getActive(), false);
+    ASSERT_EQ(signal.getProperty("Name").getReadOnly(), true);
+    ASSERT_EQ(signal.getDescription(), "foo");
+    ASSERT_EQ(signal.getDescriptor(), DataDescriptorBuilder().build());
+    ASSERT_EQ(signal.getDomainSignal(), domainSignal);
+    ASSERT_EQ(signal.getRelatedSignals(), List<ISignal>(domainSignal));
+    ASSERT_EQ(signal.getName(), "custom_name");
+    ASSERT_EQ(signal.getTags(), tags);
+    ASSERT_EQ(signal.getVisible(), false);
+    ASSERT_EQ(signal.getLocalId(), "sig");
+    ASSERT_EQ(signal.getParent(), nullptr);
 }
 
 END_NAMESPACE_OPENDAQ

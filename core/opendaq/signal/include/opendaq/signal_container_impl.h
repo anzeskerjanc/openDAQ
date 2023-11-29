@@ -50,6 +50,8 @@ protected:
     LoggerComponentPtr signalContainerLoggerComponent;
 
     SignalConfigPtr createAndAddSignal(const std::string& localId, const DataDescriptorPtr& descriptor = nullptr);
+    SignalBuilderPtr createSignalBuilder(const std::string& localId);
+
     void addSignal(const SignalPtr& signal);
     void removeSignal(const SignalConfigPtr& signal);
 
@@ -94,7 +96,7 @@ public:
                         const StringPtr& className = nullptr,
                         ComponentStandardProps propsMode = ComponentStandardProps::Add);
 
-    ErrCode INTERFACE_FUNC getItems(IList** items) override;
+    virtual ErrCode INTERFACE_FUNC getItems(IList** items, ISearchParams* searchParams) override;
     ErrCode INTERFACE_FUNC getItem(IString* localId, IComponent** item) override;
     ErrCode INTERFACE_FUNC isEmpty(Bool* empty) override;
     ErrCode INTERFACE_FUNC hasItem(IString* localId, Bool* value) override;
@@ -129,9 +131,18 @@ SignalContainerImpl<Intf, Intfs...>::SignalContainerImpl(const ContextPtr& conte
 }
 
 template <class Intf, class ... Intfs>
-ErrCode SignalContainerImpl<Intf, Intfs...>::getItems(IList** items)
+ErrCode SignalContainerImpl<Intf, Intfs...>::getItems(IList** items, ISearchParams* searchParams)
 {
     OPENDAQ_PARAM_NOT_NULL(items);
+
+    if (searchParams)
+    {
+        return daqTry([&]
+        {
+            *items = this->searchItems(searchParams, this->components).detach();
+            return OPENDAQ_SUCCESS;
+        });
+    }
 
     auto itemList = List<IComponent>();
     for (const auto& component : this->components)
@@ -199,6 +210,12 @@ SignalConfigPtr GenericSignalContainerImpl<Intf, Intfs ...>::createAndAddSignal(
 
     addSignal(signal);
     return signal;
+}
+
+template <class Intf, class ... Intfs>
+SignalBuilderPtr GenericSignalContainerImpl<Intf, Intfs...>::createSignalBuilder(const std::string& localId)
+{
+    return SignalBuilder(this->context, signals, localId);
 }
 
 template <class Intf, class... Intfs>

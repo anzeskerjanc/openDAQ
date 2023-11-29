@@ -10,6 +10,7 @@
 #include "opcuatms/exceptions.h"
 #include <opcuatms_server/objects/tms_server_device.h>
 #include <opcuatms_client/objects/tms_client_device_factory.h>
+#include <opendaq/search_params_factory.h>
 #include "tms_object_integration_test.h"
 
 using namespace daq;
@@ -103,8 +104,8 @@ TEST_F(TmsDeviceTest, GetSignals)
             ASSERT_EQ(signals.getCount(), 0u);
     }
 
-    ASSERT_NO_THROW(signals = clientDevice.getSignalsRecursive());
-    ASSERT_EQ(signals.getCount(), serverDevice.getSignalsRecursive().getCount());
+    ASSERT_NO_THROW(signals = clientDevice.getSignals(SearchParams(true, true)));
+    ASSERT_EQ(signals.getCount(), serverDevice.getSignals(SearchParams(true, true)).getCount());
 }
 
 TEST_F(TmsDeviceTest, GetChannels)
@@ -120,8 +121,8 @@ TEST_F(TmsDeviceTest, GetChannels)
     ASSERT_NO_THROW(channels = clientDevice.getChannels());
     ASSERT_EQ(channels.getCount(), serverDevice.getChannels().getCount());
 
-    ASSERT_NO_THROW(channels = clientDevice.getChannelsRecursive());
-    ASSERT_EQ(channels.getCount(), serverDevice.getChannelsRecursive().getCount());
+    ASSERT_NO_THROW(channels = clientDevice.getChannels(SearchParams(true, true)));
+    ASSERT_EQ(channels.getCount(), serverDevice.getChannels(SearchParams(true, true)).getCount());
 }
 
 // TODO: Enable once name and description are no longer props

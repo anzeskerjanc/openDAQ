@@ -16,6 +16,7 @@
 #pragma once
 #include <opendaq/signal_config_ptr.h>
 #include <opendaq/context_ptr.h>
+#include <opendaq/signal_builder_ptr.h>
 #include <opendaq/data_descriptor_factory.h>
 
 BEGIN_NAMESPACE_OPENDAQ
@@ -26,7 +27,42 @@ BEGIN_NAMESPACE_OPENDAQ
  * @{
  */
 
-// TODO: reintroduce className parameter when duck-typing is limited.
+/*!
+ * @brief Creates a signal using the metadata configured within the Signal Builder
+ * @param signalBuilder The Signal Builder object that contains metadata for signal creation.
+ */
+inline SignalPtr Signal(const SignalBuilderPtr& signalBuilder)
+{
+    SignalPtr obj(SignalFromBuilder_Create(signalBuilder));
+    return obj;
+}
+
+/*!
+ * @brief Creates a Signal Builder with all fields set to their defaults.
+ *
+ * The builder needs at least the context, parent, and localId configured before `build` is called.
+ */
+inline SignalBuilderPtr SignalBuilder()
+{
+    SignalBuilderPtr obj(SignalBuilderEmpty_Create());
+    return obj;
+}
+
+/*!
+ * @brief Creates a Signal Builder with the context, parent, and localId configured.
+ * @param context The openDAQ context. Should be the same as contained in all components in a given instance.
+ * @param parent The parent of the Signal that is being built.
+ * @param localId An ID of the signal. Should be unique amongst all children of the provided parent.
+ *
+ * Other builder fields are set to their default values.
+ */
+inline SignalBuilderPtr SignalBuilder(const ContextPtr& context,
+                                      const ComponentPtr& parent,
+                                      const StringPtr& localId)
+{
+    SignalBuilderPtr obj(SignalBuilder_Create(context, parent, localId));
+    return obj;
+}
 
 /*!
  * @brief Creates a new Signal with a given Context and Descriptor, as well as an optional uniqueId.
@@ -34,13 +70,15 @@ BEGIN_NAMESPACE_OPENDAQ
  * @param descriptor The Signal-descriptor.
  * @param parent <description-missing>
  * @param localId <description-missing>
+ * @param className <description-missing>
  */
 inline SignalConfigPtr SignalWithDescriptor(const ContextPtr& context,
                                             const DataDescriptorPtr& descriptor,
                                             const ComponentPtr& parent,
-                                            const StringPtr& localId)
+                                            const StringPtr& localId,
+                                            const StringPtr& className = nullptr)
 {
-    SignalConfigPtr obj(SignalWithDescriptor_Create(context, descriptor, parent, localId, nullptr));
+    SignalConfigPtr obj(SignalWithDescriptor_Create(context, descriptor, parent, localId, className));
     return obj;
 }
 
@@ -49,12 +87,14 @@ inline SignalConfigPtr SignalWithDescriptor(const ContextPtr& context,
  * @param context The Context. Most often the creating function-block/device passes its own Context to the Signal.
  * @param parent <description-missing>
  * @param localId <description-missing>
+ * @param className <description-missing>
  */
 inline SignalConfigPtr Signal(const ContextPtr& context,
                               const ComponentPtr& parent,
-                              const StringPtr& localId)
+                              const StringPtr& localId,
+                              const StringPtr& className = nullptr)
 {
-    SignalConfigPtr obj(Signal_Create(context, parent, localId, nullptr));
+    SignalConfigPtr obj(Signal_Create(context, parent, localId, className));
     return obj;
 }
 

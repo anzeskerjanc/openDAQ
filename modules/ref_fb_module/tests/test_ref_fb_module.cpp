@@ -1,7 +1,7 @@
 #include <testutils/testutils.h>
 #include <ref_fb_module/module_dll.h>
 #include <ref_fb_module/version.h>
-
+#include <opendaq/search_params_factory.h>
 #include <opendaq/module_ptr.h>
 #include <opendaq/signal_factory.h>
 #include <coretypes/common.h>
@@ -151,7 +151,7 @@ TEST_F(RefFbModuleTest, StatisticsNumOfSignals)
     auto module = CreateModule();
 
     auto fb = module.createFunctionBlock("ref_fb_module_statistics", nullptr, "id");
-    ASSERT_EQ(fb.getSignalsRecursive().getCount(), 3u);
+    ASSERT_EQ(fb.getSignals(SearchParams(false, true)).getCount(), 3u);
 }
 
 TEST_F(RefFbModuleTest, CreateFunctionBlockClassifier)

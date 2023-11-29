@@ -23,6 +23,7 @@
 #include <opendaq/logger_component_ptr.h>
 #include <opendaq/signal_config_ptr.h>
 #include <opendaq/signal_container_impl.h>
+#include <opendaq/search_params_factory.h>
 
 BEGIN_NAMESPACE_OPENDAQ
 
@@ -47,11 +48,12 @@ public:
 
     ErrCode INTERFACE_FUNC getFunctionBlockType(IFunctionBlockType** type) override;
 
-    ErrCode INTERFACE_FUNC getInputPorts(IList** ports) override;
-    ErrCode INTERFACE_FUNC getSignals(IList** signals) override;
+    ErrCode INTERFACE_FUNC getItems(IList** items, ISearchParams* searchParams = nullptr) override;
+    ErrCode INTERFACE_FUNC getInputPorts(IList** ports, ISearchParams* searchParams = nullptr) override;
+    ErrCode INTERFACE_FUNC getSignals(IList** signals, ISearchParams* searchParams = nullptr) override;
     ErrCode INTERFACE_FUNC getSignalsRecursive(IList** signals) override;
     ErrCode INTERFACE_FUNC getStatusSignal(ISignal** statusSignal) override;
-    ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks) override;
+    ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks, ISearchParams* searchParams = nullptr) override;
 
     // IInputPortNotifications
     ErrCode INTERFACE_FUNC acceptsSignal(IInputPort* port, ISignal* signal, Bool* accept) override;
@@ -90,6 +92,11 @@ protected:
     void deserializeFunctionBlock(const std::string& fbId, const SerializedObjectPtr& serializedFunctionBlock) override;
 
     void updateObject(const SerializedObjectPtr& obj) override;
+
+private:
+    ListPtr<ISignal> getSignalsRecursiveInternal(const SearchParamsPtr& searchParams);
+    ListPtr<IFunctionBlock> getFunctionBlocksRecursive(const SearchParamsPtr& searchParams);
+    ListPtr<IInputPort> getInputPortsRecursive(const SearchParamsPtr& searchParams);
 };
 
 template <typename TInterface, typename... Interfaces>
@@ -117,48 +124,116 @@ ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getFunctionBlockType(IFunc
     return OPENDAQ_SUCCESS;
 }
 
-template <typename TInterface, typename... Interfaces>
-ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getSignals(IList** signals)
+template <typename TInterface, typename ... Interfaces>
+ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getItems(IList** items, ISearchParams* searchParams)
 {
-    if (signals == nullptr)
-        return OPENDAQ_ERR_ARGUMENT_NULL;
+    if (searchParams)
+    {
+        const auto searchParamsPtr = SearchParamsPtr::Borrow(searchParams);
+        const auto id = searchParamsPtr.getSearchId();
 
-    return this->signals->getItems(signals);
+        if (id == ISignal::Id)
+            return getSignals(items, searchParams);
+        if (id == IFunctionBlock::Id)
+            return getFunctionBlocks(items, searchParams);
+        if (id == IInputPort::Id)
+            return getInputPorts(items, searchParams);
+    }
+
+    return Super::getItems(items, searchParams);
 }
 
 template <typename TInterface, typename... Interfaces>
-ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getSignalsRecursive(IList** signals)
+ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getSignals(IList** signals, ISearchParams* searchParams)
 {
     OPENDAQ_PARAM_NOT_NULL(signals);
 
-    return daqTry(
-        [this, &signals]
+    if (!searchParams)
+        return this->signals->getItems(signals);
+
+    SearchParamsPtr signalSearchParams = SearchParamsBuilderCopy(searchParams).setSearchId(ISignal::Id).build();
+    if(signalSearchParams.getRecursive())
+    {
+        return daqTry([&]
         {
-            auto signalList = List<ISignal>();
-            auto devSignals = this->signals.getItems();
-            for (const auto& sig : devSignals)
-                signalList.pushBack(sig.template asPtr<ISignal>());
-
-            auto fbs = this->functionBlocks.getItems();
-            for (const auto& fb : fbs)
-            {
-                auto fbSigs = fb.template asPtr<IFunctionBlock>(true).getSignalsRecursive();
-                for (const auto& fbSig : fbSigs)
-                    signalList.pushBack(fbSig);
-            }
-
-            *signals = signalList.detach();
+            *signals = getSignalsRecursiveInternal(signalSearchParams).detach();
             return OPENDAQ_SUCCESS;
         });
+    }
+
+    return this->signals->getItems(signals, signalSearchParams);
+}
+
+template <typename TInterface, typename ... Interfaces>
+ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getSignalsRecursive(IList** signals)
+{
+    OPENDAQ_PARAM_NOT_NULL(signals);
+    return daqTry([&]
+    {
+        *signals = getSignalsRecursiveInternal(SearchParamsBuilder().setRecursive(true).setSearchId(ISignal::Id).build()).detach();
+        return OPENDAQ_SUCCESS;
+    });
 }
 
 template <typename TInterface, typename... Interfaces>
-ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getInputPorts(IList** ports)
+ListPtr<ISignal> FunctionBlockImpl<TInterface, Interfaces...>::getSignalsRecursiveInternal(const SearchParamsPtr& searchParams)
 {
-    if (ports == nullptr)
-        return OPENDAQ_ERR_ARGUMENT_NULL;
+    tsl::ordered_set<SignalPtr, ComponentHash, ComponentEqualTo> allSignals;
+    const SearchParamsPtr visibleParamCopy = SearchParams(searchParams.getVisibleOnly());
 
-    return inputPorts->getItems(ports);
+    for (const auto& sig : this->signals.getItems(searchParams))
+        allSignals.insert(sig.template asPtr<ISignal>());
+
+    for (const auto& functionBlock : this->functionBlocks.getItems(visibleParamCopy))
+        for (const auto& signal : functionBlock.template asPtr<IFunctionBlock>().getSignals(searchParams))
+            allSignals.insert(signal);
+
+    auto signalList = List<ISignal>();
+    for (const auto& signal : allSignals)
+        signalList.pushBack(signal);
+
+    return signalList;
+}
+
+template <typename TInterface, typename... Interfaces>
+ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getInputPorts(IList** ports, ISearchParams* searchParams)
+{
+    OPENDAQ_PARAM_NOT_NULL(ports);
+
+    if (!searchParams)
+        return this->inputPorts->getItems(ports);
+
+    SearchParamsPtr portsSearchParams = SearchParamsBuilderCopy(searchParams).setSearchId(IInputPort::Id).build();
+    if(portsSearchParams.getRecursive())
+    {
+        return daqTry([&]
+        {
+            *ports = getInputPortsRecursive(portsSearchParams).detach();
+            return OPENDAQ_SUCCESS;
+        });
+    }
+
+    return this->inputPorts->getItems(ports, portsSearchParams);
+}
+
+template <typename TInterface, typename... Interfaces>
+ListPtr<IInputPort> FunctionBlockImpl<TInterface, Interfaces...>::getInputPortsRecursive(const SearchParamsPtr& searchParams)
+{
+    tsl::ordered_set<InputPortPtr, ComponentHash, ComponentEqualTo> allPorts;
+    const SearchParamsPtr visibleParamCopy = SearchParams(searchParams.getVisibleOnly());
+
+    for (const auto& ip : this->inputPorts.getItems(searchParams))
+        allPorts.insert(ip.template asPtr<IInputPort>());
+
+    for (const auto& functionBlock : this->functionBlocks.getItems(visibleParamCopy))
+        for (const auto& ip : functionBlock.template asPtr<IFunctionBlock>().getInputPorts(searchParams))
+            allPorts.insert(ip);
+
+    auto portsList = List<IInputPort>();
+    for (const auto& port : allPorts)
+        portsList.pushBack(port);
+
+    return portsList;
 }
 
 template <typename TInterface, typename... Interfaces>
@@ -248,12 +323,45 @@ SignalPtr FunctionBlockImpl<TInterface, Interfaces...>::onGetStatusSignal()
 }
 
 template <typename TInterface, typename... Interfaces>
-ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getFunctionBlocks(IList** functionBlocks)
+ErrCode FunctionBlockImpl<TInterface, Interfaces...>::getFunctionBlocks(IList** functionBlocks, ISearchParams* searchParams)
 {
-    if (functionBlocks == nullptr)
-        return OPENDAQ_ERR_ARGUMENT_NULL;
+    OPENDAQ_PARAM_NOT_NULL(functionBlocks);
 
-    return this->functionBlocks->getItems(functionBlocks);
+    if (!searchParams)
+        return this->functionBlocks->getItems(functionBlocks);
+
+    SearchParamsPtr fbSearchParams = SearchParamsBuilderCopy(searchParams).setSearchId(IFunctionBlock::Id).build();
+    if(fbSearchParams.getRecursive())
+    {
+        return daqTry([&]
+        {
+            *functionBlocks = getFunctionBlocksRecursive(fbSearchParams).detach();
+            return OPENDAQ_SUCCESS;
+        });
+    }
+
+    return this->functionBlocks->getItems(functionBlocks, fbSearchParams);
+}
+
+template <typename TInterface, typename... Interfaces>
+ListPtr<IFunctionBlock> FunctionBlockImpl<TInterface, Interfaces...>::getFunctionBlocksRecursive(const SearchParamsPtr& searchParams)
+{
+    tsl::ordered_set<FunctionBlockPtr, ComponentHash, ComponentEqualTo> allFbs;
+    const SearchParamsPtr visibleParamCopy = SearchParams(searchParams.getVisibleOnly());
+    const SearchParamsPtr nonRecursiveParamCopy = SearchParamsBuilderCopy(searchParams).setRecursive(false).build();
+
+    for (const auto& fb : this->functionBlocks.getItems(nonRecursiveParamCopy))
+        allFbs.insert(fb.template asPtr<IFunctionBlock>());
+
+    for (const auto& functionBlock : this->functionBlocks.getItems(visibleParamCopy))
+        for (const auto& fb : functionBlock.template asPtr<IFunctionBlock>().getFunctionBlocks(searchParams))
+            allFbs.insert(fb);
+
+    auto fbList = List<IFunctionBlock>();
+    for (const auto& fb : allFbs)
+        fbList.pushBack(fb);
+
+    return fbList;
 }
 
 template <typename TInterface, typename... Interfaces>

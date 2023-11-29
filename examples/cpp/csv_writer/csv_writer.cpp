@@ -322,7 +322,7 @@ int main(int argc, const char* argv[])
     {
         std::vector<Recorder> recorders;
         std::string deviceName = "device_" + device.getInfo().getName();
-        auto signals = device.getSignalsRecursive();
+        auto signals = device.getSignals(daq::SearchParams(true, true));
 
         std::cout << deviceName << std::endl;
 

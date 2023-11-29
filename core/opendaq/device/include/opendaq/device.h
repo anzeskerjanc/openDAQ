@@ -103,20 +103,22 @@ DECLARE_OPENDAQ_INTERFACE(IDevice, IFolder)
     // [elementType(signals, ISignal)]
     /*!
      * @brief Gets a list of the device's signals.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] signals The flat list of signals.
      *
-     * The list does not include signals that belong to channels and/or function blocks
-     * of the device. Device signals are most often domain signals shared by other signals that
-     * belong to channels and/or function blocks.
+     * If searchParams is not provided, the returned list contains only visible signals and does not include those of
+     * child function blocks, devices, or channels.
+     *
+     * Device signals are most often domain signals shared by other signals that belong to channels and/or function blocks.
      */
-    virtual ErrCode INTERFACE_FUNC getSignals(IList** signals) = 0;
+    virtual ErrCode INTERFACE_FUNC getSignals(IList** signals, ISearchParams* searchParams = nullptr) = 0;
 
     // [elementType(signals, ISignal)]
     /*!
      * @brief Gets a list of the signals that belong to the device.
      * @param[out] signals The flat list of signals.
      *
-     * The list includes signals that belong to channels, function blocks, or sub devices
+     * The list includes visible signals that belong to visible channels, function blocks, or sub devices
      * of the device.
      */
     virtual ErrCode INTERFACE_FUNC getSignalsRecursive(IList** signals) = 0;
@@ -124,13 +126,17 @@ DECLARE_OPENDAQ_INTERFACE(IDevice, IFolder)
     // [elementType(channels, IChannel)]
     /*!
      * @brief Gets a flat list of the device's physical channels.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] channels The flat list of channels.
+     *
+     * If searchParams is not provided, the returned list contains only visible channels and does not include those of
+     * child devices.
      */
-    virtual ErrCode INTERFACE_FUNC getChannels(IList** channels) = 0;
+    virtual ErrCode INTERFACE_FUNC getChannels(IList** channels, ISearchParams* searchParams = nullptr) = 0;
 
     // [elementType(channels, IChannel)]
     /*!
-     * @brief Gets a flat list of the device's physical channels. Also finds all channels of child devices
+     * @brief Gets a flat list of the device's physical channels. Also finds all visible channels of visible child devices
      * @param[out] channels The flat list of channels.
      */
     virtual ErrCode INTERFACE_FUNC getChannelsRecursive(IList** channels) = 0;
@@ -138,9 +144,13 @@ DECLARE_OPENDAQ_INTERFACE(IDevice, IFolder)
     // [elementType(devices, IDevice)]
     /*!
      * @brief Gets a list of child devices that the device is connected to.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] devices The list of devices.
+     *
+     * If searchParams is not provided, the returned list contains only visible devices and does not include those of
+     * child devices.
      */
-    virtual ErrCode INTERFACE_FUNC getDevices(IList** devices) = 0;
+    virtual ErrCode INTERFACE_FUNC getDevices(IList** devices, ISearchParams* searchParams = nullptr) = 0;
 
     // [elementType(availableDevices, IDeviceInfo)]
     /*!
@@ -183,9 +193,13 @@ DECLARE_OPENDAQ_INTERFACE(IDevice, IFolder)
     // [elementType(functionBlocks, IFunctionBlock)]
     /*!
      * @brief Gets the list of added function blocks.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] functionBlocks The list of added function blocks.
+     *
+     * If searchParams is not provided, the returned list contains only visible function blocks and does not include those of
+     * child function blocks, devices, or channels.
      */
-    virtual ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks) = 0;
+    virtual ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks, ISearchParams* searchParams = nullptr) = 0;
 
     // [templateType(functionBlockTypes, IString, IFunctionBlockType)]
     /*!

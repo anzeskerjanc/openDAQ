@@ -23,11 +23,16 @@
 #include <opendaq/component_ptr.h>
 #include <coretypes/weakrefptr.h>
 #include <opendaq/tags_factory.h>
+#include <opendaq/search_params_ptr.h>
+#include <opendaq/folder_ptr.h>
 #include <mutex>
+#include <opendaq/component_keys.h>
+#include <tsl/ordered_set.h>
 #include <opendaq/custom_log.h>
 
 BEGIN_NAMESPACE_OPENDAQ
-    static constexpr int ComponentSerializeFlag_SerializeActiveProp = 1;
+
+static constexpr int ComponentSerializeFlag_SerializeActiveProp = 1;
 
 template <class Intf = IComponent, class ... Intfs>
 class ComponentImpl : public GenericPropertyObjectImpl<Intf, IRemovable, Intfs ...>
@@ -52,6 +57,7 @@ public:
     ErrCode INTERFACE_FUNC getDescription(IString** description) override;
     ErrCode INTERFACE_FUNC setDescription(IString* description) override;
     ErrCode INTERFACE_FUNC getTags(ITagsConfig** tags) override;
+    ErrCode INTERFACE_FUNC getVisible(Bool* visible) override;
 
     ErrCode INTERFACE_FUNC remove() override;
     ErrCode INTERFACE_FUNC isRemoved(Bool* removed) override;
@@ -61,10 +67,12 @@ public:
 protected:
     virtual void activeChanged();
     virtual void removed();
+    ListPtr<IComponent> searchItems(const SearchParamsPtr& searchParams, const std::vector<ComponentPtr>& items);
 
     std::mutex sync;
     ContextPtr context;
 
+    bool visible;
     bool active;
     bool isComponentRemoved;
     WeakRefPtr<IComponent> parent;
@@ -95,6 +103,7 @@ ComponentImpl<Intf, Intfs...>::ComponentImpl(
     : GenericPropertyObjectImpl<Intf, IRemovable, Intfs ...>(context.assigned() ? context.getTypeManager() : nullptr,
                                                              className)
       , context(context)
+      , visible(true)
       , active(true)
       , isComponentRemoved(false)
       , parent(parent)
@@ -281,6 +290,15 @@ ErrCode ComponentImpl<Intf, Intfs...>::getTags(ITagsConfig** tags)
     return OPENDAQ_SUCCESS;
 }
 
+template <class Intf, class ... Intfs>
+ErrCode ComponentImpl<Intf, Intfs...>::getVisible(Bool* visible)
+{
+    OPENDAQ_PARAM_NOT_NULL(visible);
+
+    *visible = this->visible;
+    return OPENDAQ_SUCCESS;
+}
+
 template<class Intf, class ... Intfs>
 ErrCode ComponentImpl<Intf, Intfs ...>::remove()
 {
@@ -338,6 +356,78 @@ void ComponentImpl<Intf, Intfs...>::removed()
 {
 }
 
+template <class Intf, class ... Intfs>
+ListPtr<IComponent> ComponentImpl<Intf, Intfs...>::searchItems(const SearchParamsPtr& searchParams, const std::vector<ComponentPtr>& items)
+{
+    const auto searchId = searchParams.getSearchId();
+     const auto visibleOnly = searchParams.getVisibleOnly();
+    const auto recursive = searchParams.getRecursive();
+    const auto requiredTags = searchParams.getRequiredTags();
+    const auto excludedTags = searchParams.getExcludedTags();
+
+    IList* list;
+    checkErrorInfo(createListWithElementType(&list, searchId));
+    ListPtr<IComponent> childList = ListPtr<IComponent>::Adopt(list);
+
+    tsl::ordered_set<ComponentPtr, ComponentHash, ComponentEqualTo> allItems;
+    for (const auto& item : items)
+    {
+        if (!item.supportsInterface(searchId))
+            continue;
+
+         if (visibleOnly && !item.getVisible())
+			continue;
+
+        bool invalid = false;
+        for (const auto& tag : requiredTags)
+        {
+            if (!this->tags.contains(tag))
+            {
+                invalid = true;
+                break;
+            }
+        }
+
+        if (invalid)
+            continue;
+
+        for (const auto& tag : excludedTags)
+        {
+            if (this->tags.contains(tag))
+            {
+                invalid = true;
+                break;
+            }
+        }
+
+        if (invalid)
+            continue;
+
+        allItems.insert(item);
+    }
+
+    if (recursive)
+    {
+        for (const auto& item : items)
+        {
+            if (const auto folder = item.asPtrOrNull<IFolder>(); folder.assigned())
+            {
+                if (visibleOnly && !folder.getVisible())
+                    continue;
+
+                const auto childItems = folder.getItems(searchParams);
+                for (const auto& child : childItems)
+                    allItems.insert(child);
+            }
+        }
+    }
+
+    for (const auto& signal : allItems)
+        childList.pushBack(signal);
+
+    return childList.detach();
+}
+
 template <class Intf, class... Intfs>
 ErrCode ComponentImpl<Intf, Intfs...>::serializeCustomValues(ISerializer* serializer)
 {
@@ -381,8 +471,14 @@ std::unordered_map<std::string, SerializedObjectPtr> ComponentImpl<Intf, Intfs..
 }
 
 template <class Intf, class... Intfs>
-void ComponentImpl<Intf, Intfs...>::updateObject(const SerializedObjectPtr& /* obj */)
+void ComponentImpl<Intf, Intfs...>::updateObject(const SerializedObjectPtr& obj)
 {
+    const auto flags = getSerializeFlags();
+    if (flags & ComponentSerializeFlag_SerializeActiveProp && obj.hasKey("active"))
+        active = obj.readBool("active");
+
+    if (obj.hasKey("visible"))
+        visible = obj.readBool("visible");
 }
 
 template <class Intf, class... Intfs>
@@ -394,6 +490,12 @@ void ComponentImpl<Intf, Intfs...>::serializeCustomObjectValues(const Serializer
     {
         serializer.key("active");
         serializer.writeBool(active);
+    }
+
+    if (!visible)
+    {
+        serializer.key("visible");
+        serializer.writeBool(visible);
     }
 
     if (!tags.getList().empty())

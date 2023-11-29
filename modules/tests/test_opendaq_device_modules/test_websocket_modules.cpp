@@ -26,7 +26,7 @@ static InstancePtr CreateServerInstance()
 
     const auto statistics = instance.addFunctionBlock("ref_fb_module_statistics");
     const auto refDevice = instance.addDevice("daqref://device1");
-    statistics.getInputPorts()[0].connect(refDevice.getSignalsRecursive()[0]);
+    statistics.getInputPorts()[0].connect(refDevice.getSignals(SearchParams(true, true))[0]);
 
     instance.addServer("openDAQ WebsocketTcp Streaming", nullptr);
 
@@ -60,7 +60,7 @@ TEST_F(WebsocketModulesTest, GetRemoteDeviceObjects)
     auto client = CreateClientInstance();
 
     ASSERT_EQ(client.getDevices().getCount(), 1u);
-    auto signals = client.getSignalsRecursive();
+    auto signals = client.getSignals(SearchParams(true, true));
     ASSERT_EQ(signals.getCount(), 7u);
 }
 
@@ -71,13 +71,13 @@ TEST_F(WebsocketModulesTest, SignalConfig_Server)
 
     auto server = CreateServerInstance();
 
-    auto serverSignal = server.getSignalsRecursive()[0].asPtr<ISignalConfig>();
+    auto serverSignal = server.getSignals(SearchParams(true, true))[0].asPtr<ISignalConfig>();
     auto serverSignalDataDescriptor = DataDescriptorBuilderCopy(serverSignal.getDescriptor()).setName(newSignalName).build();
     serverSignal.setDescriptor(serverSignalDataDescriptor);
 
     auto client = CreateClientInstance();
 
-    auto clientSignals = client.getDevices()[0].getSignalsRecursive();
+    auto clientSignals = client.getDevices()[0].getSignals(SearchParams(true, true));
     auto clientSignal = clientSignals[0].asPtr<ISignalConfig>();
 
     auto clientSignalDataDescriptor = DataDescriptorBuilderCopy(clientSignal.getDescriptor()).build();
@@ -92,11 +92,11 @@ TEST_F(WebsocketModulesTest, DataDescriptor)
     auto server = CreateServerInstance();
     auto client = CreateClientInstance();
 
-    DataDescriptorPtr dataDescriptor = client.getSignalsRecursive()[0].getDescriptor();
-    DataDescriptorPtr serverDataDescriptor = server.getSignalsRecursive()[0].getDescriptor();
+    DataDescriptorPtr dataDescriptor = client.getSignals(SearchParams(true, true))[0].getDescriptor();
+    DataDescriptorPtr serverDataDescriptor = server.getSignals(SearchParams(true, true))[0].getDescriptor();
 
-    DataDescriptorPtr domainDataDescriptor = client.getSignalsRecursive()[1].getDescriptor();
-    DataDescriptorPtr serverDomainDataDescriptor = server.getSignalsRecursive()[1].getDescriptor();
+    DataDescriptorPtr domainDataDescriptor = client.getSignals(SearchParams(true, true))[1].getDescriptor();
+    DataDescriptorPtr serverDomainDataDescriptor = server.getSignals(SearchParams(true, true))[1].getDescriptor();
 
     ASSERT_EQ(dataDescriptor.getName(), serverDataDescriptor.getName());
     ASSERT_EQ(dataDescriptor.getDimensions().getCount(), serverDataDescriptor.getDimensions().getCount());
@@ -118,7 +118,7 @@ TEST_F(WebsocketModulesTest, DISABLED_RenderSignal)
     auto server = CreateServerInstance();
     auto client = CreateClientInstance();
 
-    auto signals = client.getSignalsRecursive();
+    auto signals = client.getSignals(SearchParams(true, true));
     const auto renderer = client.addFunctionBlock("ref_fb_module_renderer");
     renderer.getInputPorts()[0].connect(signals[0]);
 

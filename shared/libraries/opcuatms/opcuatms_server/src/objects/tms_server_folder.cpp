@@ -3,6 +3,7 @@
 #include "opcuatms/converters/variant_converter.h"
 #include "open62541/tmsdevice_nodeids.h"
 #include "opendaq/io_folder_config.h"
+#include "opendaq/search_params_factory.h"
 
 BEGIN_NAMESPACE_OPENDAQ_OPCUA_TMS
 
@@ -16,7 +17,7 @@ TmsServerFolder::TmsServerFolder(const FolderPtr& object, const OpcUaServerPtr& 
 void TmsServerFolder::addChildNodes()
 {
     uint32_t numberInList = 0;
-    for (auto item : object.getItems())
+    for (auto item : object.getItems(SearchParams(false)))
     {
         auto folder = item.asPtrOrNull<IFolder>();
         auto channel = item.asPtrOrNull<IChannel>();

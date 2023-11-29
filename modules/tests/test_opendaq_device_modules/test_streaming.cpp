@@ -41,7 +41,7 @@ public:
 
     SignalPtr getSignal(const DevicePtr& device, const std::string& signalName)
     {
-        auto signals = device.getSignalsRecursive();
+        auto signals = device.getSignals(SearchParams(true, true));
 
         for (const auto& signal : signals)
         {

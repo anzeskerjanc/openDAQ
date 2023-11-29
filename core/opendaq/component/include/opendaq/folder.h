@@ -17,6 +17,7 @@
 #pragma once
 
 #include <opendaq/component.h>
+#include <opendaq/search_params.h>
 
 BEGIN_NAMESPACE_OPENDAQ
 
@@ -44,9 +45,12 @@ DECLARE_OPENDAQ_INTERFACE(IFolder, IComponent)
     // [elementType(items, IComponent)]
     /*!
      * @brief Gets the list of the items in the folder.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] items The list of the items.
+     *
+     * If searchParams is not provided, the returned list contains only immediate children with visible set to `true`.
      */
-    virtual ErrCode INTERFACE_FUNC getItems(IList** items) = 0;
+    virtual ErrCode INTERFACE_FUNC getItems(IList** items, ISearchParams* searchParams = nullptr) = 0;
 
     /*!
      * @brief Returns True if the folder is empty.

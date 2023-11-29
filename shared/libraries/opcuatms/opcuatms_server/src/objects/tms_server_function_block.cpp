@@ -4,6 +4,7 @@
 #include "open62541/statuscodes.h"
 #include "open62541/tmsbsp_nodeids.h"
 #include "open62541/di_nodeids.h"
+#include "opendaq/search_params_factory.h"
 
 BEGIN_NAMESPACE_OPENDAQ_OPCUA_TMS
 
@@ -50,7 +51,7 @@ void TmsServerFunctionBlock<T>::addChildNodes()
     assert(!signalsNodeId.isNull());
     
     uint32_t numberInList = 0;
-    for (const auto& signal : this->object.getSignals())
+    for (const auto& signal : this->object.getSignals(SearchParams(false)))
     {
         auto tmsSignal = this->template registerTmsObjectOrAddReference<TmsServerSignal>(signalsNodeId, signal, numberInList++);
         signals.push_back(std::move(tmsSignal));
@@ -60,14 +61,14 @@ void TmsServerFunctionBlock<T>::addChildNodes()
     assert(!inputPortsNodeId.isNull());
     
     numberInList = 0;
-    for (const auto& inputPort : this->object.getInputPorts())
+    for (const auto& inputPort : this->object.getInputPorts(SearchParams(false)))
     {
         auto tmsInputPort = this->template registerTmsObjectOrAddReference<TmsServerInputPort>(inputPortsNodeId, inputPort, numberInList++);
         inputPorts.push_back(std::move(tmsInputPort));
     }
     
     numberInList = 0;
-    for (const auto& fb : this->object.getFunctionBlocks())
+    for (const auto& fb : this->object.getFunctionBlocks(SearchParams(false)))
     {
         auto tmsFunctionBlock = this->template registerTmsObjectOrAddReference<TmsServerFunctionBlock<>>(this->nodeId, fb, numberInList++);
         functionBlocks.push_back(std::move(tmsFunctionBlock));

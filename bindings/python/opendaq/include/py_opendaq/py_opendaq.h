@@ -84,6 +84,9 @@ PyDaqIntf<daq::IStreaming, daq::IBaseObject> declareIStreaming(pybind11::module_
 PyDaqIntf<daq::IStreamingInfo, daq::IPropertyObject> declareIStreamingInfo(pybind11::module_ m);
 PyDaqIntf<daq::IStreamingInfoConfig, daq::IStreamingInfo> declareIStreamingInfoConfig(pybind11::module_ m);
 PyDaqIntf<daq::IMirroredSignalConfig, daq::ISignalConfig> declareIMirroredSignalConfig(pybind11::module_ m);
+PyDaqIntf<daq::ISearchParams, daq::IBaseObject> declareISearchParams(pybind11::module_ m);
+PyDaqIntf<daq::ISearchParamsBuilder, daq::IBaseObject> declareISearchParamsBuilder(pybind11::module_ m);
+PyDaqIntf<daq::ISignalBuilder, daq::IBaseObject> declareISignalBuilder(pybind11::module_ m);
 
 py::class_<daq::TimeReader<daq::StreamReaderPtr>> declareTimeStreamReader(pybind11::module_ m);
 
@@ -150,3 +153,6 @@ void defineIStreaming(pybind11::module_ m, PyDaqIntf<daq::IStreaming, daq::IBase
 void defineIStreamingInfo(pybind11::module_ m, PyDaqIntf<daq::IStreamingInfo, daq::IPropertyObject> cls);
 void defineIStreamingInfoConfig(pybind11::module_ m, PyDaqIntf<daq::IStreamingInfoConfig, daq::IStreamingInfo> cls);
 void defineIMirroredSignalConfig(pybind11::module_ m, PyDaqIntf<daq::IMirroredSignalConfig, daq::ISignalConfig> cls);
+void defineISearchParams(pybind11::module_ m, PyDaqIntf<daq::ISearchParams, daq::IBaseObject> cls);
+void defineISearchParamsBuilder(pybind11::module_ m, PyDaqIntf<daq::ISearchParamsBuilder, daq::IBaseObject> cls);
+void defineISignalBuilder(pybind11::module_ m, PyDaqIntf<daq::ISignalBuilder, daq::IBaseObject> cls);

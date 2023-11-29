@@ -50,6 +50,7 @@ protected:
     void configureNodeAttributes(opcua::OpcUaObject<UA_ObjectAttributes>& attr) override;
 
     std::unique_ptr<TmsServerPropertyObject> tmsPropertyObject;
+
 private:
     bool selfChange;
 };
@@ -130,6 +131,8 @@ void TmsServerComponent<Ptr>::bindCallbacks()
         });
     }
 
+	this->addReadCallback("Visible", [this]() { return VariantConverter<IBoolean>::ToVariant( this->object.getVisible()); });
+
     if (this->object.hasProperty("Name"))
     {
         this->object.getOnPropertyValueWrite("Name") +=
@@ -192,6 +195,13 @@ void TmsServerComponent<Ptr>::bindCallbacks()
 template <typename Ptr>
 void TmsServerComponent<Ptr>::addChildNodes()
 {
+	OpcUaNodeId newNodeId(0);
+	AddVariableNodeParams params(newNodeId, this->nodeId);
+	params.setBrowseName("Visible");
+	params.setDataType(OpcUaNodeId(UA_TYPES[UA_TYPES_BOOLEAN].typeId));
+    params.typeDefinition = OpcUaNodeId(UA_NODEID_NUMERIC(0, UA_NS0ID_PROPERTYTYPE));
+    this->server->addVariableNode(params);
+
     tmsPropertyObject->registerToExistingOpcUaNode(this->nodeId);
 }
 

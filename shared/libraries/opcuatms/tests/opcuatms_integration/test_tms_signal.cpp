@@ -329,3 +329,15 @@ TEST_F(TmsSignalTest, ExplicitDomainRuleDescriptor)
 
     ASSERT_EQ(signal.getDescriptor().getRule(), clientSignal.getDescriptor().getRule());
 }
+
+TEST_F(TmsSignalTest, Visible)
+{
+    const auto descriptor = DataDescriptorBuilder().setSampleType(SampleType::Int64).setRule(ExplicitDomainDataRule()).build();
+    const auto signal = SignalBuilder(NullContext(), nullptr, "sig").setDescriptor(descriptor).setVisible(false).build();
+    auto serverSignal = TmsServerSignal(signal, this->getServer(), NullContext());
+    auto nodeId = serverSignal.registerOpcUaNode();
+
+    SignalPtr clientSignal = TmsClientSignal(NullContext(), nullptr, "sig", clientContext, nodeId);
+
+    ASSERT_EQ(signal.getVisible(), clientSignal.getVisible());
+}

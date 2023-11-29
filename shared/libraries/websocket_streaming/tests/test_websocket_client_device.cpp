@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <websocket_streaming/websocket_client_device_factory.h>
 #include <websocket_streaming/websocket_streaming_server.h>
+#include <opendaq/search_params_factory.h>
 #include "streaming_test_helpers.h"
 
 using namespace daq;
@@ -161,10 +162,10 @@ TEST_F(WebsocketClientDeviceTest, DeviceWithMultipleSignals)
 
     // There should not be any difference if we get signals recursively or not,
     // since client device doesn't know anything about hierarchy
-    const size_t expectedSignalCount = serverInstance.getSignalsRecursive().getCount();
+    const size_t expectedSignalCount = serverInstance.getSignals(SearchParams(true, true)).getCount();
     ListPtr<ISignal> signals;
     ASSERT_NO_THROW(signals = clientDevice.getSignals());
     ASSERT_EQ(signals.getCount(), expectedSignalCount);
-    ASSERT_NO_THROW(signals = clientDevice.getSignalsRecursive());
+    ASSERT_NO_THROW(signals = clientDevice.getSignals(SearchParams(true, true)));
     ASSERT_EQ(signals.getCount(), expectedSignalCount);
 }

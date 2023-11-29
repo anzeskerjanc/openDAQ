@@ -8,6 +8,8 @@ set(RTGEN_OUTPUT_DIR ${GENERATED_HEADERS_DIR})
 set(RTGEN_OUTPUT_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 rtgen(SRC_Component component.h)
+rtgen(SRC_SearchParams search_params.h)
+rtgen(SRC_SearchParamsBuilder search_params_builder.h)
 rtgen(SRC_Folder folder.h)
 rtgen(SRC_FolderConfig folder_config.h)
 rtgen(SRC_Removable removable.h)
@@ -26,9 +28,21 @@ source_group("component" FILES ${SDK_HEADERS_DIR}/component.h
                                folder_impl.cpp
 )
 
+source_group("component" FILES ${SDK_HEADERS_DIR}/search_params.h
+                               ${SDK_HEADERS_DIR}/search_params_impl.h
+                               ${SDK_HEADERS_DIR}/search_params_factory.h
+                               ${SDK_HEADERS_DIR}/component_factory.h
+                               ${SDK_HEADERS_DIR}/search_params_builder.h
+                               ${SDK_HEADERS_DIR}/search_params_builder_impl.h
+                               search_params_impl.cpp
+                               search_params_builder_impl.cpp
+)
+
 set(SRC_Cpp 
     component_impl.cpp
     folder_impl.cpp
+    search_params_impl.cpp
+    search_params_builder_impl.cpp
 )
 
 
@@ -38,10 +52,12 @@ set(SRC_PublicHeaders
     folder_factory.h
     folder_impl.h
     component_factory.h
-    component_keys.h
+    search_params_factory.h
 )
 
-set(SRC_PrivateHeaders 
+set(SRC_PrivateHeaders
+    search_params_impl.h
+    search_params_builder_impl.h
 )
 
 prepend_include(${MAIN_TARGET} SRC_PublicHeaders)
@@ -50,6 +66,8 @@ prepend_include(${MAIN_TARGET} SRC_PrivateHeaders)
 list(APPEND SRC_Cpp ${SRC_Component_Cpp}
                     ${SRC_Folder_Cpp}
                     ${SRC_FolderConfig_Cpp}
+                    ${SRC_SearchParams_Cpp}
+                    ${SRC_SearchParamsBuilder_Cpp}
 )
 
 list(APPEND SRC_PublicHeaders ${SRC_Component_PublicHeaders}
@@ -57,6 +75,8 @@ list(APPEND SRC_PublicHeaders ${SRC_Component_PublicHeaders}
                               ${SRC_FolderConfig_PublicHeaders}
                               ${SRC_IoFolder_PublicHeaders}
                               ${SRC_Removable_PublicHeaders}
+                              ${SRC_SearchParamsBuilder_PublicHeaders}
+                              ${SRC_SearchParams_PublicHeaders}
 )
 
 opendaq_add_library(${BASE_NAME} STATIC

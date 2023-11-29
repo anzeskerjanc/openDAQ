@@ -90,8 +90,8 @@ MirroredSignalBase<Interfaces...>::MirroredSignalBase(const ContextPtr& ctx,
                                                       const StringPtr& className,
                                                       const ComponentStandardProps propsMode)
     : Super(ctx, parent, localId, className, propsMode)
-      , listened(false)
-      , streamed(true)
+    , listened(false)
+    , streamed(true)
 {
 }
 

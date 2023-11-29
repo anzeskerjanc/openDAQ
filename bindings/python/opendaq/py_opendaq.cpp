@@ -89,6 +89,9 @@ void wrapDaqComponentOpenDaq(pybind11::module_ m)
     auto classIStreamingInfo = declareIStreamingInfo(m);
     auto classIStreamingInfoConfig = declareIStreamingInfoConfig(m);
     auto classIMirroredSignalConfig = declareIMirroredSignalConfig(m);
+    auto classISearchParams = declareISearchParams(m);
+    auto classISearchParamsBuilder = declareISearchParamsBuilder(m);
+    auto classISignalBuilder = declareISignalBuilder(m);
 
     defineIAllocator(m, classIAllocator);
     defineIRemovable(m, classIRemovable);
@@ -153,6 +156,9 @@ void wrapDaqComponentOpenDaq(pybind11::module_ m)
     defineIStreamingInfo(m, classIStreamingInfo);
     defineIStreamingInfoConfig(m, classIStreamingInfoConfig);
     defineIMirroredSignalConfig(m, classIMirroredSignalConfig);
+    defineISearchParams(m, classISearchParams);
+    defineISearchParamsBuilder(m, classISearchParamsBuilder);
+    defineISignalBuilder(m, classISignalBuilder);
     
     m.def("Instance", []() { return daq::Instance(".").detach(); });
 }

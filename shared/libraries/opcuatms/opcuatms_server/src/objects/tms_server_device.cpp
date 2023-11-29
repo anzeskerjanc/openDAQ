@@ -10,6 +10,7 @@
 #include <opendaq/component_ptr.h>
 #include <opendaq/device_private.h>
 #include <opendaq/streaming_info_ptr.h>
+#include <opendaq/search_params_factory.h>
 
 BEGIN_NAMESPACE_OPENDAQ_OPCUA_TMS
 
@@ -237,7 +238,7 @@ void TmsServerDevice::addChildNodes()
     tmsPropertyObject->setMethodParentNodeId(methodSetNodeId);
 
     uint32_t numberInList = 0;
-    for (const auto& device : object.getDevices())
+    for (const auto& device : object.getDevices(SearchParams(false)))
     {
         auto tmsDevice = registerTmsObjectOrAddReference<TmsServerDevice>(nodeId, device, numberInList++);
         devices.push_back(std::move(tmsDevice));
@@ -246,7 +247,7 @@ void TmsServerDevice::addChildNodes()
     auto functionBlockNodeId = getChildNodeId("FB");
     assert(!functionBlockNodeId.isNull());
     numberInList = 0;
-    for (const auto& functionBlock : object.getFunctionBlocks())
+    for (const auto& functionBlock : object.getFunctionBlocks(SearchParams(false)))
     {
         auto tmsFunctionBlock = registerTmsObjectOrAddReference<TmsServerFunctionBlock<>>(functionBlockNodeId, functionBlock, numberInList++);
         functionBlocks.push_back(std::move(tmsFunctionBlock));
@@ -255,7 +256,7 @@ void TmsServerDevice::addChildNodes()
     auto signalsNodeId = getChildNodeId("Sig");
     assert(!signalsNodeId.isNull());
     numberInList = 0;
-    for (const auto& signal : object.getSignals())
+    for (const auto& signal : object.getSignals(SearchParams(false)))
     {
         auto tmsSignal = registerTmsObjectOrAddReference<TmsServerSignal>(signalsNodeId, signal, numberInList++);
         signals.push_back(std::move(tmsSignal));
@@ -270,7 +271,7 @@ void TmsServerDevice::addChildNodes()
     folders.push_back(std::move(inputsOutputsNode));
     
     numberInList = 0;
-    for (auto component : object.getItems())
+    for (auto component : object.getItems(SearchParams(false)))
     {
         auto id = component.getLocalId();
         if (id == "Dev" || id == "FB" || id == "IO" || id == "Sig")

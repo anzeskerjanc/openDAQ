@@ -31,6 +31,7 @@
 #include <coretypes/validation.h>
 #include <opendaq/component_impl.h>
 #include <opendaq/input_port_private_ptr.h>
+#include <opendaq/signal_builder_ptr.h>
 
 #include <utility>
 
@@ -57,8 +58,10 @@ public:
                DataDescriptorPtr descriptor,
                const ComponentPtr& parent,
                const StringPtr& localId,
-               const StringPtr& className,
+               const StringPtr& className = nullptr,
                ComponentStandardProps propsMode = ComponentStandardProps::Add);
+    explicit SignalBase(const SignalBuilderPtr& builder);
+
     ~SignalBase() override;
 
     ErrCode INTERFACE_FUNC getPublic(Bool* isPublic) override;
@@ -140,6 +143,44 @@ SignalBase<TInterface, Interfaces...>::SignalBase(const ContextPtr& context,
     , dataDescriptor(std::move(descriptor))
 {
     initSignalProperties(propsMode);
+}
+
+template <typename TInterface, typename ... Interfaces>
+SignalBase<TInterface, Interfaces...>::SignalBase(const SignalBuilderPtr& builder)
+    : Super(builder.getContext(),
+            builder.getParent(),
+            builder.getLocalId(),
+            builder.getClassName(),
+            builder.getComponentStandardPropsMode())
+{
+    auto objPtr = this->template borrowPtr<ComponentPtr>();
+
+    const auto builderName = builder.getName();
+    if (builderName.assigned() && objPtr.hasProperty("Name"))
+        this->setPropertyValueInternal(String("Name"), builderName, false, true, false);
+    
+    const auto builderDescription = builder.getDescription();
+    if (builderDescription .assigned() && objPtr.hasProperty("Description"))
+        this->setPropertyValueInternal(String("Description"), builderDescription , false, true, false);
+
+    this->visible = builder.getVisible();
+    this->active = builder.getActive();
+    this->isPublic = builder.getPublic();
+    this->dataDescriptor = builder.getDescriptor();
+
+    const auto relatedSignals = builder.getRelatedSignals();
+    if (relatedSignals.assigned())
+        this->setRelatedSignals(relatedSignals);
+
+    const auto tags = builder.getTags();
+    if (tags.assigned())
+        this->tags = tags;
+
+    const auto domainSignal = builder.getDomainSignal();
+    if (domainSignal.assigned())
+        this->setDomainSignal(domainSignal);
+
+    initSignalProperties(builder.getComponentStandardPropsMode());
 }
 
 template <typename TInterface, typename... Interfaces>

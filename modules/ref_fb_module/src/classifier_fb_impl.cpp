@@ -526,8 +526,9 @@ void ClassifierFbImpl::createInputPorts()
 
 void ClassifierFbImpl::createSignals()
 {
-    outputSignal = createAndAddSignal(String("output"));
-    outputDomainSignal = createAndAddSignal(String("output_domain"));
+    outputSignal = createAndAddSignal("output");
+    outputDomainSignal = createSignalBuilder("output_domain").setVisible(false).build();
+    addSignal(outputDomainSignal);
     outputSignal.setDomainSignal(outputDomainSignal);
 }
 

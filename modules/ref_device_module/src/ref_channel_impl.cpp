@@ -351,7 +351,8 @@ double RefChannelImpl::coerceSampleRate(const double wantedSampleRate) const
 void RefChannelImpl::createSignals()
 {
     valueSignal = createAndAddSignal(fmt::format("ai{}", index));
-    timeSignal = createAndAddSignal(fmt::format("ai{}_time", index));
+    timeSignal = createSignalBuilder(fmt::format("ai{}_time", index)).setVisible(false).build();
+    addSignal(timeSignal);
 }
 
 void RefChannelImpl::globalSampleRateChanged(double newGlobalSampleRate)

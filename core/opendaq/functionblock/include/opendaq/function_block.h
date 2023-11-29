@@ -60,22 +60,28 @@ DECLARE_OPENDAQ_INTERFACE(IFunctionBlock, IFolder)
     // [elementType(ports, IInputPort)]
     /*!
      * @brief Gets a list of the function block's input ports.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] ports The list of input ports.
+     *
+     * If searchParams is not provided, the returned list contains only visible input ports and does not include those of
+     * child function blocks.
      */
-    virtual ErrCode INTERFACE_FUNC getInputPorts(IList** ports) = 0;
+    virtual ErrCode INTERFACE_FUNC getInputPorts(IList** ports, ISearchParams* searchParams = nullptr) = 0;
 
     // [elementType(signals, ISignal)]
     /*!
      * @brief Gets the list of the function block's output signals.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] signals The list of output signals.
      *
-     * The list does not include signals from child function blocks
+     * If searchParams is not provided, the returned list contains only visible signals and does not include those of
+     * child function blocks.
      */
-    virtual ErrCode INTERFACE_FUNC getSignals(IList** signals) = 0;
+    virtual ErrCode INTERFACE_FUNC getSignals(IList** signals, ISearchParams* searchParams = nullptr) = 0;
 
     // [elementType(signals, ISignal)]
     /*!
-     * @brief Gets the list of the function block's output signals including signals from child function blocks.
+     * @brief Gets the list of the function block's visible output signals including signals from visible child function blocks.
      * @param[out] signals The list of output signals.
      */
     virtual ErrCode INTERFACE_FUNC getSignalsRecursive(IList** signals) = 0;
@@ -92,9 +98,13 @@ DECLARE_OPENDAQ_INTERFACE(IFunctionBlock, IFolder)
     // [elementType(functionBlocks, IFunctionBlock)]
     /*!
      * @brief Gets a list of sub-function blocks.
+     * @param searchParams Provides optional parameters such as "recursive" and "visibleOnly" to modify the search pattern.
      * @param[out] functionBlocks The list of sub-function blocks.
+     *
+     * If searchParams is not provided, the returned list contains only visible function blocks and does not include those of
+     * child function blocks.
      */
-    virtual ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks) = 0;
+    virtual ErrCode INTERFACE_FUNC getFunctionBlocks(IList** functionBlocks, ISearchParams* searchParams = nullptr) = 0;
 };
 /*!@}*/
 
