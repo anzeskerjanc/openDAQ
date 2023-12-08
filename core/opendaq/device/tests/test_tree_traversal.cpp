@@ -15,8 +15,8 @@ using namespace daq;
 class TestFolder : public FolderImpl<>
 {
 public:
-    TestFolder(const ComponentPtr& parent, const StringPtr& id, Bool visible) 
-        : FolderImpl<>(NullContext(), parent, id)
+    TestFolder(const ContextPtr& context, const ComponentPtr& parent, const StringPtr& id, Bool visible) 
+        : FolderImpl<>(context, parent, id)
     {
         this->visible = visible;
     }
@@ -25,8 +25,8 @@ public:
 class TestComponent : public ComponentImpl<>
 {
 public:
-    TestComponent(const ComponentPtr& parent, const StringPtr& id, Bool visible) 
-        : ComponentImpl<>(NullContext(), parent,id)
+    TestComponent(const ContextPtr& context, const ComponentPtr& parent, const StringPtr& id, Bool visible) 
+        : ComponentImpl<>(context, parent,id)
     {
         this->visible = visible;
     }
@@ -35,8 +35,8 @@ public:
 class TestSignal : public SignalImpl
 {
 public:
-    TestSignal(const ComponentPtr& parent, const StringPtr& id, Bool visible) 
-        : SignalImpl(NullContext(), parent, id)
+    TestSignal(const ContextPtr& context, const ComponentPtr& parent, const StringPtr& id, Bool visible) 
+        : SignalImpl(context, parent, id)
     {
         this->visible = visible;
     }
@@ -45,49 +45,49 @@ public:
 class TestFunctionBlock: public FunctionBlockImpl<>
 {
 public:
-    TestFunctionBlock(const ComponentPtr& parent,  const StringPtr& id, Bool visible) 
-        : FunctionBlockImpl<>(nullptr, NullContext(), parent, id)
+    TestFunctionBlock(const ContextPtr& context, const ComponentPtr& parent,  const StringPtr& id, Bool visible) 
+        : FunctionBlockImpl<>(nullptr, context, parent, id)
     {
         this->visible = visible;
         
 
-        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(this->signals, "sigVis", true));
-        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(this->signals, "sigInvis", false));
+        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(context, this->signals, "sigVis", true));
+        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(context, this->signals, "sigInvis", false));
 
-        this->inputPorts.addItem(InputPort(NullContext(), this->inputPorts, "ip"));
+        this->inputPorts.addItem(InputPort(context, this->inputPorts, "ip"));
     }
 };
 
 class TestChannel : public ChannelImpl<>
 {
 public:
-    TestChannel(const ComponentPtr& parent, const StringPtr& id, Bool visible, Bool isRoot = true) 
-        : ChannelImpl<>(nullptr, NullContext(), parent, id)
+    TestChannel(const ContextPtr& context, const ComponentPtr& parent, const StringPtr& id, Bool visible, Bool isRoot = true) 
+        : ChannelImpl<>(nullptr, context, parent, id)
     {
         this->visible = visible;
-        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(this->signals, "sigVis", true));
-        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(this->signals, "sigInvis", false));
+        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(context, this->signals, "sigVis", true));
+        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(context, this->signals, "sigInvis", false));
 
-        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(this->functionBlocks, "fbVis", true));
-        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(this->functionBlocks, "fbInvis", false));
+        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(context, this->functionBlocks, "fbVis", true));
+        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(context, this->functionBlocks, "fbInvis", false));
     }
 };
 
 class TestIOFolder : public IoFolderImpl
 {
 public:
-    TestIOFolder(const ComponentPtr& parent, const StringPtr& id, Bool visible, Bool isRoot = true) 
-        : IoFolderImpl(NullContext(), parent, id)
+    TestIOFolder(const ContextPtr& context, const ComponentPtr& parent, const StringPtr& id, Bool visible, Bool isRoot = true) 
+        : IoFolderImpl(context, parent, id)
     {
         this->visible = visible;
         const auto thisPtr = this->borrowPtr<ComponentPtr>();
-        this->addItemInternal(createWithImplementation<IChannel, TestChannel>(thisPtr, "chVis", true));
-        this->addItemInternal(createWithImplementation<IChannel, TestChannel>(thisPtr, "chInvis", false));
+        this->addItemInternal(createWithImplementation<IChannel, TestChannel>(context, thisPtr, "chVis", true));
+        this->addItemInternal(createWithImplementation<IChannel, TestChannel>(context, thisPtr, "chInvis", false));
 
         if (isRoot)
         {
-            this->addItemInternal(createWithImplementation<IIoFolderConfig, TestIOFolder>(thisPtr, "ioVis", true, false));
-            this->addItemInternal(createWithImplementation<IIoFolderConfig, TestIOFolder>(thisPtr, "ioInvis", false, false));
+            this->addItemInternal(createWithImplementation<IIoFolderConfig, TestIOFolder>(context, thisPtr, "ioVis", true, false));
+            this->addItemInternal(createWithImplementation<IIoFolderConfig, TestIOFolder>(context, thisPtr, "ioInvis", false, false));
         }
     }
 };
@@ -95,24 +95,24 @@ public:
 class TestDevice : public Device
 {
 public:
-    TestDevice(const ComponentPtr& parent, const StringPtr& id, Bool visible, Bool isRoot = true)
-        : Device(NullContext(), parent, id)
+    TestDevice(const ContextPtr& context, const ComponentPtr& parent, const StringPtr& id, Bool visible, Bool isRoot = true)
+        : Device(context, parent, id)
     {
         this->visible = visible;
         if (isRoot)
         {
-            this->devices.addItem(createWithImplementation<IDevice, TestDevice>(this->devices, "devVis", true, false));
-            this->devices.addItem(createWithImplementation<IDevice, TestDevice>(this->devices, "devInvis", false, false));
+            this->devices.addItem(createWithImplementation<IDevice, TestDevice>(context, this->devices, "devVis", true, false));
+            this->devices.addItem(createWithImplementation<IDevice, TestDevice>(context, this->devices, "devInvis", false, false));
         }
 
-        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(this->signals, "sigVis", true));
-        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(this->signals, "sigInvis", false));
+        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(context, this->signals, "sigVis", true));
+        this->signals.addItem(createWithImplementation<ISignal, TestSignal>(context, this->signals, "sigInvis", false));
 
-        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(this->functionBlocks, "fbVis", true));
-        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(this->functionBlocks, "fbInvis", false));
+        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(context, this->functionBlocks, "fbVis", true));
+        this->functionBlocks.addItem(createWithImplementation<IFunctionBlock, TestFunctionBlock>(context, this->functionBlocks, "fbInvis", false));
 
-        this->ioFolder.addItem(createWithImplementation<IIoFolderConfig, TestIOFolder>(this->ioFolder, "ioVis", true));
-        this->ioFolder.addItem(createWithImplementation<IIoFolderConfig, TestIOFolder>(this->ioFolder, "ioInvis", false));
+        this->ioFolder.addItem(createWithImplementation<IIoFolderConfig, TestIOFolder>(context, this->ioFolder, "ioVis", true));
+        this->ioFolder.addItem(createWithImplementation<IIoFolderConfig, TestIOFolder>(context, this->ioFolder, "ioInvis", false));
     }
 
     DeviceInfoPtr onGetInfo() override
@@ -124,7 +124,7 @@ public:
 
 TEST_F(TreeTraversalTest, SubDevices)
 {
-    auto device = createWithImplementation<IDevice, TestDevice>(nullptr, "dev", true);
+    auto device = createWithImplementation<IDevice, TestDevice>(NullContext(), nullptr, "dev", true);
     ASSERT_EQ(device.getDevices().getCount(), 1);
     ASSERT_EQ(device.getDevices(SearchParamsBuilder().setVisibleOnly(false).build()).getCount(), 2);
     ASSERT_EQ(device.getDevices(SearchParams(true, true)).getCount(), 1);
@@ -133,7 +133,7 @@ TEST_F(TreeTraversalTest, SubDevices)
 
 TEST_F(TreeTraversalTest, FunctionBlocks)
 {
-    auto device = createWithImplementation<IDevice, TestDevice>(nullptr, "dev", true);
+    auto device = createWithImplementation<IDevice, TestDevice>(NullContext(), nullptr, "dev", true);
     ASSERT_EQ(device.getFunctionBlocks().getCount(), 1);
     ASSERT_EQ(device.getFunctionBlocks(SearchParamsBuilder().setVisibleOnly(false).build()).getCount(), 2);
     ASSERT_EQ(device.getFunctionBlocks(SearchParams(true, true)).getCount(), 2);
@@ -144,7 +144,7 @@ TEST_F(TreeTraversalTest, FunctionBlocks)
 
 TEST_F(TreeTraversalTest, Channels)
 {
-    auto device = createWithImplementation<IDevice, TestDevice>(nullptr, "dev", true);
+    auto device = createWithImplementation<IDevice, TestDevice>(NullContext(), nullptr, "dev", true);
     ASSERT_EQ(device.getChannels().getCount(), 2);
     ASSERT_EQ(device.getChannels(SearchParamsBuilder().setVisibleOnly(false).build()).getCount(), 12);
     ASSERT_EQ(device.getChannels(SearchParams(true, true)).getCount(), 4);
@@ -155,7 +155,7 @@ TEST_F(TreeTraversalTest, Channels)
 
 TEST_F(TreeTraversalTest, Signals)
 {
-    auto device = createWithImplementation<IDevice, TestDevice>(nullptr, "dev", true);
+    auto device = createWithImplementation<IDevice, TestDevice>(NullContext(), nullptr, "dev", true);
     ASSERT_EQ(device.getSignals().getCount(), 1);
     ASSERT_EQ(device.getSignals(SearchParamsBuilder().setVisibleOnly(false).build()).getCount(), 2);
     ASSERT_EQ(device.getSignalsRecursive().getCount(), 12);
@@ -166,7 +166,7 @@ TEST_F(TreeTraversalTest, Signals)
 
 TEST_F(TreeTraversalTest, InputPorts)
 {
-    auto device = createWithImplementation<IDevice, TestDevice>(nullptr, "dev", true);
+    auto device = createWithImplementation<IDevice, TestDevice>(NullContext(), nullptr, "dev", true);
     auto fb = device.getFunctionBlocks()[0];
     ASSERT_EQ(fb.getInputPorts().getCount(), 1);
     ASSERT_EQ(device.getItems(SearchParamsBuilder().setRecursive(true).setVisibleOnly(false).setSearchId(IInputPort::Id).build()).getCount(), 78);
