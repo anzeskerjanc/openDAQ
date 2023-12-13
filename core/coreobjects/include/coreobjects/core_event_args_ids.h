@@ -30,6 +30,11 @@ namespace core_event_ids
     constexpr Int UpdateEnd = 10;
     constexpr Int PropertyAdded = 20;
     constexpr Int PropertyRemoved = 30;
+    constexpr Int ComponentAdded = 40;
+    constexpr Int ComponentRemoved = 50;
+    constexpr Int SignalConnected = 60;
+    constexpr Int SignalDisconnected = 70;
+    constexpr Int DataDescriptorChanged = 80;
 }
 
 /*!@}*/

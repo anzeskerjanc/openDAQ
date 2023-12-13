@@ -119,6 +119,8 @@ OPENDAQ_DECLARE_CLASS_FACTORY(
  * @brief Creates Core event args that are passed as argument when a property value of a component is changed.
  * @param propName The name of the property of which value was changed.
  * @param value The new value of the property.
+ *
+ * The ID of the event is 0, and the event name is "PropertyValueChanged".
  */
 OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
     LIBRARY_FACTORY, CoreEventArgsPropertyValueChanged, ICoreEventArgs,
@@ -132,6 +134,7 @@ OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
  * as key, and the new value (base object) as the dictionary value.
  *
  * A component finished updating when `endUpdate` is called, or at the end of the `update` call.
+ * The ID of the event is 10, and the event name is "UpdateEnd".
  */
 OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
     LIBRARY_FACTORY, CoreEventArgsUpdateEnd, ICoreEventArgs,
@@ -141,6 +144,8 @@ OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
 /*!
  * @brief Creates Core event args that are passed as argument when a property is added to a component.
  * @param prop The property that was added.
+ *
+ * The ID of the event is 20, and the event name is "PropertyAdded".
  */
 OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
     LIBRARY_FACTORY, CoreEventArgsPropertyAdded, ICoreEventArgs,
@@ -150,6 +155,8 @@ OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
 /*!
  * @brief Creates Core event args that are passed as argument when a property is removed from a component.
  * @param propName The name of the property that was removed.
+ *
+ * The ID of the event is 30, and the event name is "PropertyRemoved".
  */
 OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
     LIBRARY_FACTORY, CoreEventArgsPropertyRemoved, ICoreEventArgs,
