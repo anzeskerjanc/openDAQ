@@ -134,6 +134,12 @@ ErrCode InputPortImpl::connect(ISignal* signal)
         return OPENDAQ_ERR_GENERALERROR;
     }
 
+    if (this->coreEvent.assigned())
+    {
+         const ComponentPtr thisPtr = this->borrowPtr<ComponentPtr>();
+         this->coreEvent(thisPtr, CoreEventArgsSignalConnected(signal));
+    }
+
     return OPENDAQ_SUCCESS;
 }
 
@@ -174,6 +180,12 @@ void InputPortImpl::disconnectSignalInternal(bool notifyListener, bool notifySig
             if (listener.assigned())
                 listener->disconnected(borrowInterface());
         }
+    }
+
+    if (this->coreEvent.assigned())
+    {
+         const ComponentPtr thisPtr = this->borrowPtr<ComponentPtr>();
+         this->coreEvent(thisPtr, CoreEventArgsSignalDisconnected());
     }
 }
 

@@ -263,6 +263,12 @@ ErrCode SignalBase<TInterface, Interfaces...>::setDescriptor(IDataDescriptor* de
         }
     }
 
+    if (this->coreEvent.assigned())
+    {
+         const ComponentPtr thisPtr = this->template borrowPtr<ComponentPtr>();
+         this->coreEvent(thisPtr, CoreEventArgsDataDescriptorChanged(dataDescriptor));
+    }
+
     return success
         ? OPENDAQ_SUCCESS
         : OPENDAQ_IGNORED;

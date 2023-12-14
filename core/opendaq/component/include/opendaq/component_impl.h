@@ -19,7 +19,7 @@
 #include <opendaq/component.h>
 #include <opendaq/context_ptr.h>
 #include <opendaq/removable.h>
-#include <coreobjects/core_event_args_factory.h>
+#include <opendaq/core_opendaq_event_args_factory.h>
 #include <coreobjects/property_object_impl.h>
 #include <opendaq/component_ptr.h>
 #include <coretypes/weakrefptr.h>
