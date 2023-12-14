@@ -263,10 +263,14 @@ ErrCode SignalBase<TInterface, Interfaces...>::setDescriptor(IDataDescriptor* de
         }
     }
 
-    if (this->coreEvent.assigned())
+    if (!this->coreEventMuted && this->coreEvent.assigned())
     {
+        const auto args = createWithImplementation<ICoreEventArgs, CoreEventArgsImpl>(
+                core_event_ids::DataDescriptorChanged,
+                Dict<IString, IBaseObject>({{"DataDescriptor", dataDescriptor}}));
+
          const ComponentPtr thisPtr = this->template borrowPtr<ComponentPtr>();
-         this->coreEvent(thisPtr, CoreEventArgsDataDescriptorChanged(dataDescriptor));
+         this->coreEvent(thisPtr, args);
     }
 
     return success

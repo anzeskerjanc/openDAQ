@@ -71,7 +71,7 @@ BEGIN_NAMESPACE_OPENDAQ
  *  - The dictionary of updated properties under the key "UpdatedProperties". The dictionary has the string names
  *  of properties as key, and base object values as values.
  *
- * The ID of the event is 10, and the event name is "UpdateEnd".
+ * The ID of the event is 10, and the event name is "PropertyObjectUpdateEnd".
  *
  * @subsubsection opendaq_core_event_types_property_added_removed Property added/removed
  *
@@ -134,10 +134,10 @@ OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
  * as key, and the new value (base object) as the dictionary value.
  *
  * A component finished updating when `endUpdate` is called, or at the end of the `update` call.
- * The ID of the event is 10, and the event name is "UpdateEnd".
+ * The ID of the event is 10, and the event name is "PropertyObjectUpdateEnd".
  */
 OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
-    LIBRARY_FACTORY, CoreEventArgsUpdateEnd, ICoreEventArgs,
+    LIBRARY_FACTORY, CoreEventArgsPropertyObjectUpdateEnd, ICoreEventArgs,
     IDict*, updatedProperties
 )
 

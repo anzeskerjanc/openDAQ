@@ -19,6 +19,7 @@
 #include <opendaq/component.h>
 #include <opendaq/context_ptr.h>
 #include <opendaq/removable.h>
+#include <coreobjects/core_event_args_ptr.h>
 #include <opendaq/core_opendaq_event_args_factory.h>
 #include <coreobjects/property_object_impl.h>
 #include <opendaq/component_ptr.h>
@@ -26,9 +27,11 @@
 #include <opendaq/tags_factory.h>
 #include <mutex>
 #include <opendaq/custom_log.h>
+#include <coreobjects/core_event_args_impl.h>
 
 BEGIN_NAMESPACE_OPENDAQ
-    static constexpr int ComponentSerializeFlag_SerializeActiveProp = 1;
+
+static constexpr int ComponentSerializeFlag_SerializeActiveProp = 1;
 
 template <class Intf = IComponent, class ... Intfs>
 class ComponentImpl : public GenericPropertyObjectImpl<Intf, IRemovable, Intfs ...>
@@ -59,6 +62,7 @@ public:
 
     // IUpdatable
     ErrCode INTERFACE_FUNC update(ISerializedObject* obj) override;
+
 protected:
     virtual void activeChanged();
     virtual void removed();
@@ -309,6 +313,7 @@ ErrCode ComponentImpl<Intf, Intfs ...>::remove()
         activeChanged();
     }
 
+    disableCoreEventTrigger();
     removed();
 
     return OPENDAQ_SUCCESS;
@@ -332,10 +337,22 @@ ErrCode INTERFACE_FUNC ComponentImpl<Intf, Intfs...>::update(ISerializedObject* 
     return daqTry(
         [&objPtr, this]()
         {
+            const bool muted = this->coreEventMuted;
+            const auto thisPtr = this->template borrowPtr<ComponentPtr>();
+            const auto propInternalPtr = this->template borrowPtr<PropertyObjectInternalPtr>();
+            if (!muted)
+                propInternalPtr.disableCoreEventTrigger();
+
             const auto err = Super::update(objPtr);
 
             updateObject(objPtr);
 
+            if (!muted && this->coreEvent.assigned())
+            {
+                const CoreEventArgsPtr args = createWithImplementation<ICoreEventArgs, CoreEventArgsImpl>(core_event_ids::ComponentUpdateEnd, Dict<IString, IBaseObject>());
+                this->coreEvent(thisPtr, args);
+                propInternalPtr.enableCoreEventTrigger();
+            }
             return err;
         });
 }

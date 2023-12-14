@@ -29,6 +29,8 @@ BEGIN_NAMESPACE_OPENDAQ
 DECLARE_OPENDAQ_INTERFACE(IPropertyObjectInternal, IBaseObject)
 {
     virtual ErrCode INTERFACE_FUNC checkForReferences(IProperty* property, Bool* isReferenced) = 0;
+    virtual ErrCode INTERFACE_FUNC enableCoreEventTrigger() = 0;
+    virtual ErrCode INTERFACE_FUNC disableCoreEventTrigger() = 0;
 };
 
 /*!@}*/

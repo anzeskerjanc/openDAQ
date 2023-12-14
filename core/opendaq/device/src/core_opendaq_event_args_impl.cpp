@@ -41,6 +41,14 @@ ErrCode PUBLIC_EXPORT createCoreEventArgsDataDescriptorChanged(ICoreEventArgs** 
     return daq::createObject<ICoreEventArgs, CoreEventArgsImpl, Int, IDict*>(objTmp, core_event_ids::DataDescriptorChanged,dict);
 }
 
+extern "C"
+ErrCode PUBLIC_EXPORT createCoreEventArgsComponentUpdateEnd(ICoreEventArgs** objTmp)
+{
+    const auto dict = Dict<IString, IBaseObject>({});
+    return daq::createObject<ICoreEventArgs, CoreEventArgsImpl, Int, IDict*>(objTmp, core_event_ids::ComponentUpdateEnd,dict);
+}
+
+
 #endif
 
 END_NAMESPACE_OPENDAQ

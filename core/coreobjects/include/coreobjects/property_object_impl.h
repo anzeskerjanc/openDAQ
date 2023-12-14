@@ -89,6 +89,8 @@ public:
 
     // IPropertyObjectInternal
     ErrCode INTERFACE_FUNC checkForReferences(IProperty* property, Bool* isReferenced) override;
+    virtual ErrCode INTERFACE_FUNC enableCoreEventTrigger() override;
+    virtual ErrCode INTERFACE_FUNC disableCoreEventTrigger() override;
 
     // IUpdatable
     virtual ErrCode INTERFACE_FUNC update(ISerializedObject* obj) override;
@@ -131,6 +133,7 @@ protected:
     PropertyObjectPtr objPtr;
     int updateCount;
     UpdatingActions updatingPropsAndValues;
+    bool coreEventMuted;
 
     void internalDispose(bool) override;
     ErrCode setPropertyValueInternal(IString* name, IBaseObject* value, bool triggerEvent, bool protectedAccess, bool isUpdating);
@@ -242,6 +245,7 @@ template <class PropObjInterface, class... Interfaces>
 GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::GenericPropertyObjectImpl()
     : frozen(false)
     , updateCount(0)
+    , coreEventMuted(true)
     , className(nullptr)
     , objectClass(nullptr)
 {
@@ -770,7 +774,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::setPropertyV
                 if (triggerEvent)
                 {
                     const auto newVal = callPropertyValueWrite(prop, valuePtr, PropertyEventType::Update, false);
-                    if (triggerCoreEvent.assigned())
+                    if (!coreEventMuted && triggerCoreEvent.assigned())
                         triggerCoreEvent(CoreEventArgsPropertyValueChanged(propName, newVal));
                 }
             }
@@ -1285,7 +1289,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::clearPropert
             {
                 propValues.erase(it);
                 const auto val = callPropertyValueWrite(prop, nullptr, PropertyEventType::Clear, false);
-                if (triggerCoreEvent.assigned())
+                if (!coreEventMuted && triggerCoreEvent.assigned())
                     triggerCoreEvent(CoreEventArgsPropertyValueChanged(propName, val));
             }
         }
@@ -1343,7 +1347,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::addProperty(
         if (!res.second)
             return this->makeErrorInfo(OPENDAQ_ERR_ALREADYEXISTS, fmt::format(R"(Property with name {} already exists.)", propName));
 
-        if (triggerCoreEvent.assigned())
+        if (!coreEventMuted && triggerCoreEvent.assigned())
             triggerCoreEvent(CoreEventArgsPropertyAdded(propPtr));
 
         return OPENDAQ_SUCCESS;
@@ -1375,7 +1379,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::removeProper
         propValues.erase(propertyName);
     }
 
-    if(triggerCoreEvent.assigned())
+    if(!coreEventMuted && triggerCoreEvent.assigned())
         triggerCoreEvent(CoreEventArgsPropertyRemoved(propertyName));
 
     return OPENDAQ_SUCCESS;
@@ -1693,6 +1697,20 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::checkForRefe
 
 
     *isReferenced = false;
+    return OPENDAQ_SUCCESS;
+}
+
+template <typename PropObjInterface, typename ... Interfaces>
+ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::enableCoreEventTrigger()
+{
+    coreEventMuted = false;
+    return OPENDAQ_SUCCESS;
+}
+
+template <typename PropObjInterface, typename ... Interfaces>
+ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::disableCoreEventTrigger()
+{
+    coreEventMuted = true;
     return OPENDAQ_SUCCESS;
 }
 
@@ -2106,8 +2124,8 @@ void GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::updatingValuesW
         endUpdateEvent(objPtr, args);
     }
 
-    if(triggerCoreEvent.assigned())
-        triggerCoreEvent(CoreEventArgsUpdateEnd(dict));
+    if(!coreEventMuted && triggerCoreEvent.assigned())
+        triggerCoreEvent(CoreEventArgsPropertyObjectUpdateEnd(dict));
 }
 
 template <class PropObjInterface, class... Interfaces>

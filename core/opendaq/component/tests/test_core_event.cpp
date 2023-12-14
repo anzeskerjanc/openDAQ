@@ -2,6 +2,7 @@
 #include <opendaq/context_factory.h>
 #include <coreobjects/property_factory.h>
 #include <gtest/gtest.h>
+#include <coreobjects/property_object_internal_ptr.h>
 
 using namespace daq;
 
@@ -14,6 +15,7 @@ TEST_F(CoreEventTest, PropertyChanged)
     component.addProperty(StringProperty("string", "foo"));
     int callCount = 0;
 
+    component.asPtrOrNull<IPropertyObjectInternal>().enableCoreEventTrigger();
     context.getOnCoreEvent() += [&](const ComponentPtr& comp, const CoreEventArgsPtr& args)
     {
         ASSERT_EQ(args.getEventId(), core_event_ids::PropertyValueChanged);
@@ -39,6 +41,7 @@ TEST_F(CoreEventTest, PropertyChangedWithInternalEvent)
     component.addProperty(StringProperty("string", "foo"));
 
     int callCount = 0;
+    component.asPtrOrNull<IPropertyObjectInternal>().enableCoreEventTrigger();
     component.getOnPropertyValueWrite("string") +=
         [&](const PropertyObjectPtr& obj, const PropertyValueEventArgsPtr& args)
         {
@@ -83,37 +86,20 @@ TEST_F(CoreEventTest, EndUpdateEventSerilizer)
     component.clearPropertyValue("string");
     component.clearPropertyValue("int");
 
-    int propChangeCount = 0;
     int updateCount = 0;
-    int otherCount = 0;
-
+    
+    component.asPtrOrNull<IPropertyObjectInternal>().enableCoreEventTrigger();
     context.getOnCoreEvent() +=
         [&](const ComponentPtr& /*comp*/, const CoreEventArgsPtr& args)
         {
-            DictPtr<IString, IBaseObject> updated;
-            switch (args.getEventId())
-            {
-                case core_event_ids::PropertyValueChanged:
-                    propChangeCount++;
-                    break;
-                case core_event_ids::UpdateEnd:
-                    updateCount++;
-                    updated = args.getParameters().get("UpdatedProperties");
-                    ASSERT_EQ(updated.getCount(), 2);
-                    ASSERT_EQ(args.getEventName(), "UpdateEnd");
-                    break;
-                default:
-                    otherCount++;
-                    break;
-            }            
+            ASSERT_EQ(args.getEventName(), "ComponentUpdateEnd");
+        updateCount++;
         };
 
     const auto deserializer = JsonDeserializer();
     deserializer.update(component, serializer.getOutput());
 
-    ASSERT_EQ(propChangeCount, 0);
     ASSERT_EQ(updateCount, 1);
-    ASSERT_EQ(otherCount, 0);
 }
 
 TEST_F(CoreEventTest, EndUpdateEventBeginEnd)
@@ -127,7 +113,8 @@ TEST_F(CoreEventTest, EndUpdateEventBeginEnd)
     int propChangeCount = 0;
     int updateCount = 0;
     int otherCount = 0;
-
+    
+    component.asPtrOrNull<IPropertyObjectInternal>().enableCoreEventTrigger();
     context.getOnCoreEvent() +=
         [&](const ComponentPtr& /*comp*/, const CoreEventArgsPtr& args)
         {
@@ -137,11 +124,11 @@ TEST_F(CoreEventTest, EndUpdateEventBeginEnd)
                 case core_event_ids::PropertyValueChanged:
                     propChangeCount++;
                     break;
-                case core_event_ids::UpdateEnd:
+                case core_event_ids::PropertyObjectUpdateEnd:
                     updateCount++;
                     updated = args.getParameters().get("UpdatedProperties");
                     ASSERT_EQ(updated.getCount(), 2);
-                    ASSERT_EQ(args.getEventName(), "UpdateEnd");
+                    ASSERT_EQ(args.getEventName(), "PropertyObjectUpdateEnd");
                     break;
                 default:
                     otherCount++;
@@ -170,7 +157,8 @@ TEST_F(CoreEventTest, PropertyAddedEvent)
     const auto component = Component(context, nullptr, "comp");
 
     int addCount = 0;
-
+    
+    component.asPtrOrNull<IPropertyObjectInternal>().enableCoreEventTrigger();
     context.getOnCoreEvent() +=
         [&](const ComponentPtr& /*comp*/, const CoreEventArgsPtr& args)
         {
@@ -196,7 +184,8 @@ TEST_F(CoreEventTest, PropertyRemovedEvent)
     component.addProperty(FloatProperty("float", 1.123));
 
     int removeCount = 0;
-
+    
+    component.asPtrOrNull<IPropertyObjectInternal>().enableCoreEventTrigger();
     context.getOnCoreEvent() +=
         [&](const ComponentPtr& /*comp*/, const CoreEventArgsPtr& args)
         {

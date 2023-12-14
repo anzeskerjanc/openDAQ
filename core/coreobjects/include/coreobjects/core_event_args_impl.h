@@ -29,8 +29,8 @@ namespace core_event_args_impl
         {
             case core_event_ids::PropertyValueChanged:
                 return "PropertyValueChanged";
-            case core_event_ids::UpdateEnd:
-                return "UpdateEnd";
+            case core_event_ids::PropertyObjectUpdateEnd:
+                return "PropertyObjectUpdateEnd";
             case core_event_ids::PropertyAdded:
                 return "PropertyAdded";
             case core_event_ids::PropertyRemoved:
@@ -45,6 +45,8 @@ namespace core_event_args_impl
                 return "SignalDisconnected";
             case core_event_ids::DataDescriptorChanged:
                 return "DataDescriptorChanged";
+            case core_event_ids::ComponentUpdateEnd:
+                return "ComponentUpdateEnd";
             default:
                 break;
         }
@@ -88,7 +90,7 @@ inline bool CoreEventArgsImpl::validateParameters() const
     {
         case core_event_ids::PropertyValueChanged:
             return parameters.hasKey("Name") && parameters.hasKey("Value") && parameters.getCount() == 2;
-        case core_event_ids::UpdateEnd:
+        case core_event_ids::PropertyObjectUpdateEnd:
             return parameters.hasKey("UpdatedProperties") && parameters.get("UpdatedProperties").asPtrOrNull<IDict>().assigned() && parameters.getCount() == 1;
         case core_event_ids::PropertyAdded:
             return parameters.hasKey("Property") && parameters.getCount() == 1;
@@ -104,6 +106,8 @@ inline bool CoreEventArgsImpl::validateParameters() const
             return parameters.getCount() == 0;
         case core_event_ids::DataDescriptorChanged:
             return parameters.hasKey("DataDescriptor") && parameters.getCount() == 1;
+        case core_event_ids::ComponentUpdateEnd:
+            return parameters.getCount() == 0;
         default:
             break;
     }

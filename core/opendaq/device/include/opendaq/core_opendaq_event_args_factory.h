@@ -90,4 +90,11 @@ inline CoreEventArgsPtr CoreEventArgsDataDescriptorChanged(const DataDescriptorP
     return obj;
 }
 
+
+inline CoreEventArgsPtr CoreEventArgsComponentUpdateEnd()
+{
+    CoreEventArgsPtr obj(CoreEventArgsComponentUpdateEnd_Create());
+    return obj;
+}
+
 END_NAMESPACE_OPENDAQ

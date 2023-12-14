@@ -56,9 +56,9 @@ inline CoreEventArgsPtr CoreEventArgsPropertyValueChanged(const StringPtr& propN
  *
  * A component finished updating when `endUpdate` is called, or at the end of the `update` call.
  */
-inline CoreEventArgsPtr CoreEventArgsUpdateEnd(const DictPtr<IString, IBaseObject>& updatedProperties)
+inline CoreEventArgsPtr CoreEventArgsPropertyObjectUpdateEnd(const DictPtr<IString, IBaseObject>& updatedProperties)
 {
-    CoreEventArgsPtr obj(CoreEventArgsUpdateEnd_Create(updatedProperties));
+    CoreEventArgsPtr obj(CoreEventArgsPropertyObjectUpdateEnd_Create(updatedProperties));
     return obj;
 }
 
@@ -81,6 +81,7 @@ inline CoreEventArgsPtr CoreEventArgsPropertyRemoved(const StringPtr& propName)
     CoreEventArgsPtr obj(CoreEventArgsPropertyRemoved_Create(propName));
     return obj;
 }
+
 
 /*!@}*/
 

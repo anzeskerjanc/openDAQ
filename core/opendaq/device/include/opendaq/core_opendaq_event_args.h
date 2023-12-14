@@ -90,6 +90,11 @@ OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
     IDataDescriptor*, descriptor
 )
 
+OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
+    LIBRARY_FACTORY, CoreEventArgsComponentUpdateEnd, ICoreEventArgs
+)
+
+
 /*!@}*/
 
 END_NAMESPACE_OPENDAQ

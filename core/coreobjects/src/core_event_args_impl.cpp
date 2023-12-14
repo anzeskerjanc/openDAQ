@@ -15,10 +15,10 @@ ErrCode PUBLIC_EXPORT createCoreEventArgsPropertyValueChanged(ICoreEventArgs** o
 }
 
 extern "C"
-ErrCode PUBLIC_EXPORT createCoreEventArgsUpdateEnd(ICoreEventArgs** objTmp, IDict* updatedProperties)
+ErrCode PUBLIC_EXPORT createCoreEventArgsPropertyObjectUpdateEnd(ICoreEventArgs** objTmp, IDict* updatedProperties)
 {
     const auto dict = Dict<IString, IBaseObject>({{"UpdatedProperties", updatedProperties}});
-    return daq::createObject<ICoreEventArgs, CoreEventArgsImpl, Int, IDict*>(objTmp, core_event_ids::UpdateEnd,dict);
+    return daq::createObject<ICoreEventArgs, CoreEventArgsImpl, Int, IDict*>(objTmp, core_event_ids::PropertyObjectUpdateEnd,dict);
 }
 
 extern "C"

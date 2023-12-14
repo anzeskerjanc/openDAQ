@@ -134,10 +134,14 @@ ErrCode InputPortImpl::connect(ISignal* signal)
         return OPENDAQ_ERR_GENERALERROR;
     }
 
-    if (this->coreEvent.assigned())
+    if (!this->coreEventMuted && this->coreEvent.assigned())
     {
+        const auto args = createWithImplementation<ICoreEventArgs, CoreEventArgsImpl>(
+                core_event_ids::SignalConnected,
+                Dict<IString, IBaseObject>({{"Signal", signal}}));
+
          const ComponentPtr thisPtr = this->borrowPtr<ComponentPtr>();
-         this->coreEvent(thisPtr, CoreEventArgsSignalConnected(signal));
+         this->coreEvent(thisPtr, args);
     }
 
     return OPENDAQ_SUCCESS;
@@ -182,10 +186,14 @@ void InputPortImpl::disconnectSignalInternal(bool notifyListener, bool notifySig
         }
     }
 
-    if (this->coreEvent.assigned())
+    if (!this->coreEventMuted && this->coreEvent.assigned())
     {
+        const auto args = createWithImplementation<ICoreEventArgs, CoreEventArgsImpl>(
+                core_event_ids::SignalDisconnected,
+                Dict<IString, IBaseObject>());
+
          const ComponentPtr thisPtr = this->borrowPtr<ComponentPtr>();
-         this->coreEvent(thisPtr, CoreEventArgsSignalDisconnected());
+         this->coreEvent(thisPtr, args);
     }
 }
 
