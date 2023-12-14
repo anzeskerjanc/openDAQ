@@ -131,7 +131,14 @@ void TmsClientPropertyImpl::configurePropertyFields()
                     switch (propertyField)
                     {
                         case details::PropertyField::DefaultValue:
-                            this->defaultValue = VariantConverter<IBaseObject>::ToDaqObject(client->readValue(childNodeId), daqContext);
+                            try
+                            {
+                                this->defaultValue = VariantConverter<IBaseObject>::ToDaqObject(client->readValue(childNodeId), daqContext);
+                            }
+                            catch(const std::exception& e)
+                            {
+                                this->defaultValue = VariantConverter<IBaseObject>::ToDaqObject(client->readValue(nodeId), daqContext);
+                            }
                             if (this->defaultValue.assigned() && this->defaultValue.asPtrOrNull<IFreezable>().assigned())
                                 this->defaultValue.freeze();
                             break;
