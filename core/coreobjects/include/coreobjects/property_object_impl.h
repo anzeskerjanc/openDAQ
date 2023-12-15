@@ -98,7 +98,7 @@ public:
     virtual ErrCode INTERFACE_FUNC toString(CharPtr* str) override;
 
     static ConstCharPtr SerializeId();
-    static ErrCode Deserialize(ISerializedObject* serialized, IBaseObject* context, IBaseObject** obj);
+    static ErrCode Deserialize(ISerializedObject* serialized, IBaseObject* context, IFunction* factoryCallback, IBaseObject** obj);
 
     // IOwnable
     virtual ErrCode INTERFACE_FUNC setOwner(IPropertyObject* newOwner) override;
@@ -141,7 +141,7 @@ protected:
     virtual ErrCode serializeCustomValues(ISerializer* serializer);
     virtual ErrCode serializeProperty(const StringPtr& name, const ObjectPtr<IBaseObject>& value, ISerializer* serializer);
 
-    static ErrCode DeserializeProperties(ISerializedObject* serialized, IBaseObject* context, IPropertyObject* propObjPtr);
+    static ErrCode DeserializeProperties(ISerializedObject* serialized, IBaseObject* context, IFunction* factoryCallback, IPropertyObject* propObjPtr);
 
 
     // Child property handling - Used when a property is queried in the "parent.child" format
@@ -1800,6 +1800,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::serialize(IS
 template <class PropObjInterface, class... Interfaces>
 ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::Deserialize(ISerializedObject* serialized,
                                                                                 IBaseObject* context,
+                                                                                IFunction* factoryCallback,
                                                                                 IBaseObject** obj)
 {
     StringPtr className;
@@ -1834,7 +1835,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::Deserialize(
         return errCode;
     }
 
-    errCode = DeserializeProperties(serialized, context, propObjPtr);
+    errCode = DeserializeProperties(serialized, context, factoryCallback, propObjPtr);
     if (isFrozen)
     {
         if (ObjectPtr<IFreezable> freezable = propObjPtr.asPtrOrNull<IFreezable>(true); freezable.assigned())
@@ -1853,7 +1854,8 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::Deserialize(
 
 template <class PropObjInterface, class... Interfaces>
 ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::DeserializeProperties(ISerializedObject* serialized,
-                                                                                          IBaseObject* context, 
+                                                                                          IBaseObject* context,
+                                                                                          IFunction* factoryCallback, 
                                                                                           IPropertyObject* propObjPtr)
 {
     auto hasKeyStr = String("propValues");
@@ -1900,7 +1902,7 @@ ErrCode GenericPropertyObjectImpl<PropObjInterface, Interfaces...>::DeserializeP
         }
 
         BaseObjectPtr propValue;
-        errCode = propValues->readObject(keyStr, context, &propValue);
+        errCode = propValues->readObject(keyStr, context, factoryCallback, &propValue);
 
         if (OPENDAQ_FAILED(errCode))
         {
