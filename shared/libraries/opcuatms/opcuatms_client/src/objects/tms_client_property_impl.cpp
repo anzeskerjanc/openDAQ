@@ -135,7 +135,7 @@ void TmsClientPropertyImpl::configurePropertyFields()
                             {
                                 this->defaultValue = VariantConverter<IBaseObject>::ToDaqObject(client->readValue(childNodeId), daqContext);
                             }
-                            catch(const std::exception& e)
+                            catch(...)
                             {
                                 this->defaultValue = VariantConverter<IBaseObject>::ToDaqObject(client->readValue(nodeId), daqContext);
                             }
